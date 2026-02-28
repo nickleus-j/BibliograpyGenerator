@@ -18,7 +18,7 @@ namespace Bibliography.Lib.Models
 
         public List<Contributor> Contributors { get; set; } = new List<Contributor>();
 
-        public PublicationDate? PublicationDate { get; set; }=new PublicationDate { Day=1,Month=1,Year=1900};
+        public PublicationDate? PublicationDate { get; set; }=new PublicationDate { Day=1,Month=1,Year=DateTime.Now.Year};
 
         public string? Publisher { get; set; }
         public string? DigitalObjectIdentifier { get; set; }

@@ -4,8 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bibliographía"
+        xmlns:LibModels="clr-namespace:Bibliography.Lib.Models;assembly=Bibliography.Lib"
         mc:Ignorable="d"
         Title="Bibliographía" Height="500" Width="900">
+    <Window.Resources>
+        <local:DateOnlyToDateTimeConverter x:Key="DateOnlyConverter"/>
+    </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -36,7 +40,25 @@
                     <!-- Contributors -->
                     <GroupBox Header="Contributors" Margin="5">
                         <StackPanel>
-                            <ListBox ItemsSource="{Binding CurrentEntry.Contributors}" Height="100"/>
+                            <ListBox ItemsSource="{Binding CurrentEntry.Contributors}" Height="100">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type LibModels:Contributor}">
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Name Display -->
+                                            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                                <TextBlock Text="{Binding LastName}" FontWeight="Bold" />
+                                                <TextBlock Text=", " />
+                                                <TextBlock Text="{Binding FirstName}" Foreground="Gray" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                             <StackPanel Orientation="Horizontal" Margin="5">
                                 <Button Content="Add Contributor" Command="{Binding AddContributorCommand}" Margin="5"/>
                                 <Button Content="Remove Contributor" Command="{Binding RemoveContributorCommand}" Margin="5"/>
@@ -46,12 +68,9 @@
 
                     <!-- Publication Date -->
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Year:" Width="80"/>
-                        <TextBox Text="{Binding CurrentEntry.PublicationDate.Year}" Width="60"/>
-                        <Label Content="Month:" Width="60"/>
-                        <TextBox Text="{Binding CurrentEntry.PublicationDate.Month}" Width="40"/>
-                        <Label Content="Day:" Width="40"/>
-                        <TextBox Text="{Binding CurrentEntry.PublicationDate.Day}" Width="40"/>
+                        <Label Content="Publication Date:" Width="100"/>
+                        <DatePicker SelectedDate="{Binding CurrentPublishDate, Converter={StaticResource DateOnlyConverter}, 
+                           UpdateSourceTrigger=PropertyChanged}" Width="150 "/>
                     </StackPanel>
 
                     

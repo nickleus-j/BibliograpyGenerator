@@ -19,7 +19,13 @@ namespace Bibliographía
             get => _currentEntry;
             set { _currentEntry = value; OnPropertyChanged(); }
         }
-
+        public DateOnly CurrentPublishDate
+        {
+            get => CurrentEntry.PublicationDate!=null
+                ? DateOnly.FromDateTime(new DateTime(CurrentEntry.PublicationDate.Year, CurrentEntry.PublicationDate.Month ?? 1, CurrentEntry.PublicationDate.Day ?? 1))
+                : DateOnly.FromDateTime(DateTime.Now);
+            set => CurrentEntry.PublicationDate = new PublicationDate { Year = value.Year, Month = value.Month, Day = value.Day };
+        }
         public ObservableCollection<BibliographyEntry> Entries { get; set; }
             = new ObservableCollection<BibliographyEntry>();
 
@@ -58,7 +64,9 @@ namespace Bibliographía
         private void AddEntry()
         {
             Entries.Add(CurrentEntry);
+            CitationStyle citationStyle = CurrentEntry.CitationStyle;
             CurrentEntry = new BibliographyEntry(); // reset form
+            CurrentEntry.CitationStyle = citationStyle; // keep selected style
         }
 
         private void UpdateEntry()
@@ -75,7 +83,7 @@ namespace Bibliographía
 
         private void AddContributor()
         {
-            CurrentEntry.Contributors.Add(new Contributor { LastName = "New", Role = ContributorRole.Author });
+            CurrentEntry.Contributors.Add(new Contributor { LastName = "New",FirstName="Write", Role = ContributorRole.Author });
             OnPropertyChanged(nameof(CurrentEntry));
         }
 
