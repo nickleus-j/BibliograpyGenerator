@@ -25,12 +25,17 @@ namespace Bibliographía
             {
                 var c = new Contributor { FirstName = "", LastName = "", Role = ContributorRole.Author };
                 Contributors.Add(c);
+                _entry.Contributors.Add(c);
             });
 
             RemoveContributorCommand = new RelayObjectCommand(c =>
             {
                 if (c is Contributor contributor)
+                {
                     Contributors.Remove(contributor);
+                    _entry.Contributors.Remove(contributor);
+                }
+                    
             });
         }
         // ------------------------------
