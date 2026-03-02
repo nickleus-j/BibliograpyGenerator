@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bibliography.Lib.Formtters
+namespace Bibliography.Lib.Formatters
 {
     public class BibliographyFormatter
     {
@@ -16,29 +16,6 @@ namespace Bibliography.Lib.Formtters
                 Instance = new BibliographyFormatter();
             }
             return Instance;
-        }
-        public string FormatBibliography(IEnumerable<BibliographyEntry> entries, CitationStyle style)
-        {
-            if (entries == null) throw new ArgumentNullException(nameof(entries));
-
-            var sb = new StringBuilder();
-
-            // Sort by author last name then year for consistency
-            var sortedEntries = entries
-                .OrderBy(e => e.Contributors.FirstOrDefault()?.LastName ?? "")
-                .ThenBy(e => e.PublicationDate?.Year ?? int.MaxValue);
-
-            foreach (var entry in sortedEntries)
-            {
-                // Override citation style for each entry
-                entry.CitationStyle = style;
-
-                string citation = FormatCitation(entry);
-                sb.AppendLine(citation);
-                sb.AppendLine(); // extra line between entries
-            }
-
-            return sb.ToString().Trim();
         }
         public string FormatCitation(BibliographyEntry entry)
         {
@@ -74,6 +51,68 @@ namespace Bibliography.Lib.Formtters
                 default:
                     return $"{contributors}. {entry.Title}. {date}.";
             }
+        }
+        public string FormatBibliography(IEnumerable<BibliographyEntry> entries, CitationStyle? styleOverride = null)
+        {
+            if (entries == null) throw new ArgumentNullException(nameof(entries));
+            if (!entries.Any()) return "No entries provided.";
+
+            // 1. Sort entries by the first author's last name (standard academic practice)
+            var sortedEntries = entries
+                .OrderBy(e => e.Contributors.FirstOrDefault(c => c.Role == ContributorRole.Author)?.LastName ?? e.Title)
+                .ToList();
+
+            var sb = new StringBuilder();
+
+            foreach (var entry in sortedEntries)
+            {
+                // Use the override style if provided, otherwise fall back to the DTO's individual style
+                var targetStyle = styleOverride ?? entry.CitationStyle;
+
+                string formattedEntry = targetStyle switch
+                {
+                    CitationStyle.APA => FormatApa(entry),
+                    CitationStyle.MLA => FormatMla(entry),
+                    CitationStyle.IEEE => FormatIeee(entry),
+                    _ => FormatApa(entry) // Default fallback
+                };
+
+                sb.AppendLine(formattedEntry);
+                sb.AppendLine(); // Add spacing between citations
+            }
+
+            return sb.ToString().TrimEnd();
+        }
+
+        private string FormatApa(BibliographyEntry entry)
+        {
+            var author = GetPrimaryAuthor(entry);
+            var year = entry.PublicationDate?.Year.ToString() ?? "n.d.";
+            
+            // Format: Author, A. A. (Year). Title. Publisher.
+            return $"{author.LastName}, {author.FirstName?[0]}. ({year}). {entry.Title}. {entry.Publisher}.";
+        }
+
+        private string FormatMla(BibliographyEntry entry)
+        {
+            var author = GetPrimaryAuthor(entry);
+            
+            // Format: Author, First Name. Title. Publisher, Year.
+            return $"{author.LastName}, {author.FirstName}. {entry.Title}. {entry.Publisher}, {entry.PublicationDate?.Year}.";
+        }
+
+        private string FormatIeee(BibliographyEntry entry)
+        {
+            var author = GetPrimaryAuthor(entry);
+            
+            // Format: [X] F. Author, "Title," Publisher, Year.
+            return $"[1] {author.FirstName?[0]}. {author.LastName}, \"{entry.Title},\" {entry.Publisher}, {entry.PublicationDate?.Year}.";
+        }
+
+        private Contributor GetPrimaryAuthor(BibliographyEntry entry)
+        {
+            return entry.Contributors.FirstOrDefault(c => c.Role == ContributorRole.Author) 
+                   ?? new Contributor() { LastName = "Unknown Author" };
         }
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
-using Bibliography.Lib.Formtters;
+using Bibliography.Lib.Formatters;
 using Bibliography.Lib.Models;
 
 namespace Bibliography.Lib.Tests

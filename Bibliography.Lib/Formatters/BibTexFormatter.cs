@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bibliography.Lib.Formtters
+namespace Bibliography.Lib.Formatters
 {
     public class BibTexFormatter
     {
@@ -117,5 +117,6 @@ namespace Bibliography.Lib.Formtters
 
             sb.AppendLine("}");
         }
+        
     }
 }

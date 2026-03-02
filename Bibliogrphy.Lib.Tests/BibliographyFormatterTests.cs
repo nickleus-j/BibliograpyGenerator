@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Xunit;
-using Bibliography.Lib.Formtters;
+using Bibliography.Lib.Formatters;
 using Bibliography.Lib.Models;
 
 namespace Bibliography.Lib.Tests
@@ -81,7 +81,7 @@ namespace Bibliography.Lib.Tests
         {
             var entry = new BibliographyEntry
             {
-                Title = "Website Title",
+                Title = "Webpage Title",
                 Url = "http://site.example",
                 AccessDate = new DateOnly(2023, 3, 15),
                 CitationStyle = CitationStyle.Harvard
