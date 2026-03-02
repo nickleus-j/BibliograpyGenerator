@@ -1,9 +1,10 @@
-﻿using Bibliography.Lib.Models;
-using Bibliography.Lib.Formatters;
-using Xunit;
+﻿using Bibliography.Lib.Formatters;
+using Bibliography.Lib.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 
 namespace Bibliography.Lib.Tests.Formatters
 {
@@ -524,7 +525,7 @@ namespace Bibliography.Lib.Tests.Formatters
                 {
                 CreateContributor("James", "Kurose", ContributorRole.Author),
                 CreateContributor("Keith", "Ross", ContributorRole.Author)
-                },style: CitationStyle.IEEE
+                }, style: CitationStyle.IEEE
             );
 
             // Act
@@ -548,7 +549,7 @@ namespace Bibliography.Lib.Tests.Formatters
                 CreateContributor("John", "Smith", ContributorRole.Author),
                 CreateContributor("Jane", "Doe", ContributorRole.Author),
                 CreateContributor("Editor", "Name", ContributorRole.Editor)
-                },style: CitationStyle.IEEE
+                }, style: CitationStyle.IEEE
             );
 
             // Act
@@ -574,7 +575,7 @@ namespace Bibliography.Lib.Tests.Formatters
                 CreateContributor("Alice", "Johnson", ContributorRole.Author),
                 CreateContributor("Bob", "Smith", ContributorRole.Author),
                 CreateContributor("Charlie", "Brown", ContributorRole.Author)
-                },style:CitationStyle.IEEE
+                }, style: CitationStyle.IEEE
             );
 
             // Act
@@ -597,7 +598,7 @@ namespace Bibliography.Lib.Tests.Formatters
                 CreateContributor("Author", "Two", ContributorRole.Author),
                 CreateContributor("Author", "Three", ContributorRole.Author),
                 CreateContributor("Author", "Four", ContributorRole.Author)
-                },style:CitationStyle.IEEE
+                }, style: CitationStyle.IEEE
             );
 
             // Act
@@ -656,7 +657,7 @@ namespace Bibliography.Lib.Tests.Formatters
             );
 
             // Act
-            var result = formatter.FormatBibliography(new[] { entry },CitationStyle.IEEE);
+            var result = formatter.FormatBibliography(new[] { entry }, CitationStyle.IEEE);
 
             // Assert
             Assert.Contains("[1]", result);
@@ -709,7 +710,7 @@ namespace Bibliography.Lib.Tests.Formatters
         };
 
             // Act
-            var result = formatter.FormatBibliography(entries,CitationStyle.IEEE);
+            var result = formatter.FormatBibliography(entries, CitationStyle.IEEE);
 
             // Assert
             Assert.Contains("[1] J. Smith", result);
@@ -768,7 +769,7 @@ namespace Bibliography.Lib.Tests.Formatters
         {
             // Arrange
             var formatter = GetFormatter();
-            var entry = CreateTestEntry(year: 2021,style:CitationStyle.IEEE);
+            var entry = CreateTestEntry(year: 2021, style: CitationStyle.IEEE);
 
             // Act
             var result = formatter.FormatBibliography(new[] { entry });
@@ -803,7 +804,7 @@ namespace Bibliography.Lib.Tests.Formatters
         };
 
             // Act
-            var result = formatter.FormatBibliography(entries,CitationStyle.IEEE);
+            var result = formatter.FormatBibliography(entries, CitationStyle.IEEE);
 
             // Assert
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -909,6 +910,510 @@ namespace Bibliography.Lib.Tests.Formatters
         }
 
         #endregion
+        #endregion
+        #region Harvard Single Author Tests
+
+        [Fact]
+        public void FormatBibliography_HarvardWithSingleAuthor_ReturnsCorrectFormat()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                title: "Introduction to Networks",
+                publisher: "Cisco Press",
+                year: 2020,
+                style: CitationStyle.Harvard,
+                contributors: new List<Contributor>
+                {
+                CreateContributor("Andrew", "Tanenbaum", ContributorRole.Author)
+                }
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Tanenbaum, A.", result);
+            Assert.Contains("(2020)", result);
+            Assert.Contains("Introduction to Networks", result);
+            Assert.Contains("Cisco Press", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithSingleAuthorNoFirstName_ReturnsLastNameOnly()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                contributors: new List<Contributor>
+                {
+                new Contributor { FirstName = "", LastName = "Anonymous", Role = ContributorRole.Author }
+                }, style: CitationStyle.Harvard
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Anonymous,", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithSingleAuthorSingleLetterFirstName_FormatsCorrectly()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                contributors: new List<Contributor>
+                {
+                CreateContributor("J", "Smith", ContributorRole.Author)
+                }
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Smith, J.", result);
+        }
+
+        #endregion
+
+        #region Harvard Two Authors Tests
+
+        [Fact]
+        public void FormatBibliography_HarvardWithTwoAuthors_ReturnsCorrectFormat()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                title: "Computer Networking",
+                publisher: "Pearson",
+                year: 2019,
+                contributors: new List<Contributor>
+                {
+                CreateContributor("James", "Kurose", ContributorRole.Author),
+                CreateContributor("Keith", "Ross", ContributorRole.Author)
+                }
+                , style: CitationStyle.Harvard
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Kurose, J. and Ross, K.", result);
+            Assert.Contains("(2019)", result);
+            Assert.Contains("Computer Networking", result);
+            Assert.DoesNotContain("et al.", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithTwoAuthorsAndNonAuthorContributor_IgnoresNonAuthors()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                contributors: new List<Contributor>
+                {
+                CreateContributor("John", "Smith", ContributorRole.Author),
+                CreateContributor("Jane", "Doe", ContributorRole.Author),
+                CreateContributor("Editor", "Name", ContributorRole.Editor)
+                }, style: CitationStyle.Harvard
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Smith, J. and Doe, J.", result);
+            Assert.DoesNotContain("Editor", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithTwoAuthorsWithDifferentFirstLetters_FormatsCorrectly()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                contributors: new List<Contributor>
+                {
+                CreateContributor("Alexander", "Brown", ContributorRole.Author),
+                CreateContributor("Benjamin", "Green", ContributorRole.Author)
+                }, style: CitationStyle.Harvard
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Brown, A. and Green, B.", result);
+        }
+
+        #endregion
+
+        #region Harvard Three Authors Tests
+
+        [Fact]
+        public void FormatBibliography_HarvardWithThreeAuthors_DoesNotReturnsEtAl()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                title: "Advanced Research Methods",
+                contributors: new List<Contributor>
+                {
+                CreateContributor("Alice", "Johnson", ContributorRole.Author),
+                CreateContributor("Bob", "Smith", ContributorRole.Author),
+                CreateContributor("Charlie", "Brown", ContributorRole.Author),
+                }, style: CitationStyle.Harvard
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.DoesNotContain("Johnson, A. et al.", result);
+            Assert.Contains("Smith", result);
+            Assert.Contains("Brown", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithThreeAuthorsOnlyFirstAuthorShown_VerifiesEtAlUsage()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                contributors: new List<Contributor>
+                {
+                CreateContributor("First", "Author", ContributorRole.Author),
+                CreateContributor("Second", "Author", ContributorRole.Author),
+                CreateContributor("Third", "Author", ContributorRole.Author)
+                }, style: CitationStyle.Harvard
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Author, F.", result);
+            Assert.Contains("S.", result);
+        }
+
+        #endregion
+
+        #region Harvard Four or More Authors Tests
+
+        [Fact]
+        public void FormatBibliography_HarvardWithFourAuthors_ReturnsEtAl()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                contributors: new List<Contributor>
+                {
+                CreateContributor("Author", "One", ContributorRole.Author),
+                CreateContributor("Author", "Two", ContributorRole.Author),
+                CreateContributor("Author", "Three", ContributorRole.Author),
+                CreateContributor("Author", "Four", ContributorRole.Author)
+                }
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry }, CitationStyle.Harvard);
+
+            // Assert
+            Assert.Contains("One, A. et al.", result);
+            Assert.DoesNotContain("Two", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithTenAuthors_ReturnsEtAlWithFirstAuthorOnly()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var contributors = Enumerable.Range(1, 10)
+                .Select(i => CreateContributor($"Author{i}", $"Last{i}", ContributorRole.Author))
+                .ToList();
+
+            var entry = CreateTestEntry(contributors: contributors);
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry }, CitationStyle.Harvard);
+
+            // Assert
+            Assert.Contains("Last1, A. et al.", result);
+            Assert.DoesNotContain("Author2", result);
+        }
+
+        #endregion
+
+        #region Harvard Year Formatting Tests
+
+        [Fact]
+        public void FormatBibliography_HarvardWithYear_IncludedInParenthesesAfterAuthor()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(year: 2021);
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("(2021)", result);
+            Assert.Contains("Doe, J. (2021).", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithDifferentYears_FormatsEachCorrectly()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entries = new[]
+            {
+            CreateTestEntry(year: 2015),
+            CreateTestEntry(year: 2020),
+            CreateTestEntry(year: 2023)
+        };
+
+            // Act
+            var result = formatter.FormatBibliography(entries);
+
+            // Assert
+            Assert.Contains("(2015)", result);
+            Assert.Contains("(2020)", result);
+            Assert.Contains("(2023)", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithNullYear_HandlesGracefully()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = new BibliographyEntry
+            {
+                Title = "Test Title",
+                Publisher = "Test Publisher",
+                PublicationDate = null,
+                CitationStyle = CitationStyle.Harvard,
+                Contributors = new List<Contributor>
+            {
+                CreateContributor("John", "Doe", ContributorRole.Author)
+            }
+            };
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Doe, J.", result);
+            // Should not contain null or empty parentheses
+            Assert.DoesNotContain("(null)", result);
+        }
+
+        #endregion
+
+        #region Harvard Title and Publisher Tests
+
+        [Fact]
+        public void FormatBibliography_HarvardWithTitle_IncludedInOutput()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(title: "The Art of Computer Programming");
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("The Art of Computer Programming", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithPublisher_IncludedAtEnd()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(publisher: "Oxford University Press");
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("Oxford University Press", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithTitleContainingSpecialCharacters_IncludedCorrectly()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(title: "C++ Programming: Principles & Practice");
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry });
+
+            // Assert
+            Assert.Contains("C++ Programming: Principles & Practice", result);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardFormatStructure_FollowsProperOrder()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entry = CreateTestEntry(
+                title: "Sample Book",
+                publisher: "Sample Publisher",
+                year: 2022
+            );
+
+            // Act
+            var result = formatter.FormatBibliography(new[] { entry }, CitationStyle.Harvard);
+
+            // Assert
+            // Format: Author, A. (Year) Title. Publisher.
+            Assert.Equal(@"Doe, J. (2022) Sample Book. Sample Publisher.", result);
+        }
+
+        #endregion
+
+        #region Harvard Sorting Tests
+
+        [Fact]
+        public void FormatBibliography_HarvardWithUnsortedEntries_SortsByAuthorLastName()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entries = new[]
+            {
+            CreateTestEntry(title: "Zebra Book", contributors: new List<Contributor>
+            {
+                CreateContributor("Zoe", "Zhang", ContributorRole.Author)
+            }),
+            CreateTestEntry(title: "Apple Book", contributors: new List<Contributor>
+            {
+                CreateContributor("Alice", "Adams", ContributorRole.Author)
+            }),
+            CreateTestEntry(title: "Mango Book", contributors: new List<Contributor>
+            {
+                CreateContributor("Mike", "Miller", ContributorRole.Author)
+            })
+        };
+
+            // Act
+            var result = formatter.FormatBibliography(entries);
+
+            // Assert
+            var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            Assert.Contains("Adams, A.", lines[0]);
+            Assert.Contains("Miller, M.", lines[2]);
+            Assert.Contains("Zhang, Z.", lines[4]);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithNoAuthor_SortsByTitle()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entries = new[]
+            {
+            CreateTestEntry(title: "Zebra Title", contributors: new List<Contributor>
+            {
+                CreateContributor("Name", "Contributor", ContributorRole.Editor)
+            }),
+            CreateTestEntry(title: "Apple Title", contributors: new List<Contributor>
+            {
+                CreateContributor("Name", "Contributor", ContributorRole.Editor)
+            })
+        };
+
+            // Act
+            var result = formatter.FormatBibliography(entries);
+
+            // Assert
+            var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            Assert.Contains("Apple Title", lines[0]);
+            Assert.Contains("Zebra Title", lines[2]);
+        }
+
+        [Fact]
+        public void FormatBibliography_HarvardWithSameAuthorMultipleYears_SortsByAuthorThenYear()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entries = new[]
+            {
+            CreateTestEntry(year: 2023, contributors: new List<Contributor>
+            {
+                CreateContributor("John", "Smith", ContributorRole.Author)
+            }),
+            CreateTestEntry(year: 2020, contributors: new List<Contributor>
+            {
+                CreateContributor("John", "Smith", ContributorRole.Author)
+            }),
+            CreateTestEntry(year: 2021, contributors: new List<Contributor>
+            {
+                CreateContributor("John", "Smith", ContributorRole.Author)
+            })
+        };
+
+            // Act
+            var result = formatter.FormatBibliography(entries);
+
+            // Assert
+            var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            // All should be same author, sorted by year in the order they appear (sorting by author then title)
+            Assert.All(lines.Where(l => !string.IsNullOrEmpty(l)), line =>
+                Assert.Contains("Smith, J.", line));
+        }
+        [Fact]
+        public void FormatBibliography_HarvardWithMultipleEntriesVariousFormats_EachFormattedCorrectly()
+        {
+            // Arrange
+            var formatter = GetFormatter();
+            var entries = new[]
+            {
+                CreateTestEntry(
+                    title: "Single Author Book",
+                    publisher: "Publisher A",
+                    year: 2018,
+                    contributors: new List<Contributor>
+                    {
+                        CreateContributor("Single", "Author", ContributorRole.Author)
+                    }),
+                CreateTestEntry(
+                    title: "Dual Author Book",
+                    publisher: "Publisher B",
+                    year: 2019,
+                    contributors: new List<Contributor>
+                    {
+                        CreateContributor("First", "Co-Author", ContributorRole.Author),
+                        CreateContributor("Second", "Co-Author", ContributorRole.Author)
+                    }),
+                CreateTestEntry(
+                    title: "Multiple Author Book",
+                    publisher: "Publisher C",
+                    year: 2020,
+                    contributors: new List<Contributor>
+                    {
+                        CreateContributor("Lead", "Researcher", ContributorRole.Author),
+                        CreateContributor("Supporting", "Researcher", ContributorRole.Author),
+                        CreateContributor("Assisst", "Writer", ContributorRole.Author),
+                        CreateContributor("Junior", "Researcher", ContributorRole.Author)
+                    })
+            };
+
+            // Act
+            var result = formatter.FormatBibliography(entries,CitationStyle.Harvard);
+
+            // Assert
+            Assert.Contains("Author, S. (2018) Single Author Book. Publisher A.", result);
+            Assert.Contains("Co-Author, F. and Co-Author, S. (2019) Dual Author Book. Publisher B.", result);
+            Assert.Contains("Researcher, L. et al. (2020) Multiple Author Book. Publisher C.", result);
+        }
+
         #endregion
     }
 }

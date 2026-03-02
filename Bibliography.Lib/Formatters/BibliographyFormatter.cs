@@ -180,7 +180,7 @@ namespace Bibliography.Lib.Formatters
 
         private string FormatHarvardAuthors(List<Contributor> authors)
         {
-            string GetHarvardName(Contributor a) => $"{a.LastName}, {a.FirstName?[0]}.";
+            string GetHarvardName(Contributor a) =>  $"{a.LastName}, {(String.IsNullOrEmpty(a.FirstName) ? String.Empty :a.FirstName?[0])}.";
 
             if (authors.Count >= 4)
             {
