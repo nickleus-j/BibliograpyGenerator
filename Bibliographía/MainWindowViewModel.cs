@@ -1,11 +1,13 @@
 ﻿using Bibliography.Lib.Formatters;
 using Bibliography.Lib.Models;
+using Bibliography.Lib.Parsers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Bibliographía
@@ -32,6 +34,8 @@ namespace Bibliographía
             get => _citationStyle;
             set { _citationStyle = value; OnPropertyChanged(); }
         }
+        private string _bibTexForParse;
+        public string BibTexForParse { get => _bibTexForParse; set { _bibTexForParse = value;OnPropertyChanged(); } }
         // === Commands ===
         public ICommand AddEntryCommand { get; }
         public ICommand UpdateEntryCommand { get; }
@@ -40,6 +44,7 @@ namespace Bibliographía
         public ICommand RemoveContributorCommand { get; }
         public ICommand GenerateTextCommand { get; }
         public ICommand GenerateBibTeXCommand { get; }
+        public ICommand ParseBibTeXCommand { get; }
 
         // === Constructor ===
         public MainWindowViewModel()
@@ -53,6 +58,7 @@ namespace Bibliographía
             RemoveContributorCommand = new RelayCommand(RemoveContributor);
             GenerateTextCommand = new RelayCommand(GenerateText);
             GenerateBibTeXCommand = new RelayCommand(GenerateBibTeX);
+            ParseBibTeXCommand = new RelayCommand(ParseBibTex);
             CurrentEntry=Entries[0]; // Load first entry for editing
         }
         // === CRUD Methods ===
@@ -98,6 +104,17 @@ namespace Bibliographía
         private void GenerateBibTeX()
         {
             GeneratedOutput = BibTexFormatter.GetInstance().ToBibTeX(Entries.Select(e=>e._entry));
+        }
+        private void ParseBibTex()
+        {
+            BibTexParser parser = new BibTexParser();
+            IList<BibliographyEntry> parsedEntries = parser.ParseBibTexEntries(BibTexForParse);
+            Entries.Clear();
+            foreach (var item in parsedEntries)
+            {
+                Entries.Add(new BibliographyEntryViewModel(item));
+            }
+            GeneratedOutput = parsedEntries.Count.ToString() + " entries parsed.";
         }
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)

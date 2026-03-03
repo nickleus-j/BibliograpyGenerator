@@ -64,6 +64,11 @@
             </StackPanel>
             <TextBox Text="{Binding GeneratedOutput}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" MinHeight="100" FontFamily="Courier New"/>
         </StackPanel>
-        
+        <GroupBox Header="Enter BibTex To Parse" Margin="5" DockPanel.Dock="Bottom">
+            <StackPanel>
+                <TextBox Text="{Binding BibTexForParse}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"  MinHeight="100" FontFamily="Courier New"/>
+                <Button Content="Load BibTex" FontSize="14" Command="{Binding ParseBibTeXCommand}"/>
+            </StackPanel>
+        </GroupBox>
     </DockPanel>
 </Window>
