@@ -83,7 +83,7 @@ namespace Bibliography.Lib.Tests.Formatters
             var formatter = GetFormatter();
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => formatter.FormatBibliography(null));
+            Assert.Throws<ArgumentNullException>(() => formatter.FormatBibliography(null,CitationStyle.APA));
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Bibliography.Lib.Tests.Formatters
             var entries = new List<BibliographyEntry>();
 
             // Act
-            var result = formatter.FormatBibliography(entries);
+            var result = formatter.FormatBibliography(entries,CitationStyle.APA);
 
             // Assert
             Assert.Equal("No entries provided.", result);
@@ -131,7 +131,7 @@ namespace Bibliography.Lib.Tests.Formatters
             };
 
             // Act
-            var result = formatter.FormatBibliography(entries);
+            var result = formatter.FormatBibliography(entries,CitationStyle.APA);
 
             // Assert
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -149,7 +149,7 @@ namespace Bibliography.Lib.Tests.Formatters
             };
 
             // Act
-            var result = formatter.FormatBibliography(entries);
+            var result = formatter.FormatBibliography(entries,CitationStyle.APA);
 
             // Assert
             Assert.False(result.EndsWith(Environment.NewLine), "Result should not end with newline");
@@ -187,7 +187,7 @@ namespace Bibliography.Lib.Tests.Formatters
             };
 
             // Act
-            var result = formatter.FormatBibliography(entries);
+            var result = formatter.FormatBibliography(entries,CitationStyle.APA);
 
             // Assert
             var andersonIndex = result.IndexOf("Anderson");
@@ -220,7 +220,7 @@ namespace Bibliography.Lib.Tests.Formatters
             };
 
             // Act
-            var result = formatter.FormatBibliography(entries);
+            var result = formatter.FormatBibliography(entries,CitationStyle.APA);
 
             // Assert
             var appleIndex = result.IndexOf("Apple");
@@ -1335,7 +1335,7 @@ namespace Bibliography.Lib.Tests.Formatters
         };
 
             // Act
-            var result = formatter.FormatBibliography(entries);
+            var result = formatter.FormatBibliography(entries, CitationStyle.Harvard);
 
             // Assert
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
