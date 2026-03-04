@@ -12,158 +12,247 @@ namespace Bibliography.Lib.Parsers
         public IList<BibliographyEntry> ParseBibTexEntries(string bibTexString)
         {
             var entries = new List<BibliographyEntry>();
-
+            
             if (string.IsNullOrWhiteSpace(bibTexString))
                 return entries;
 
-            // Regex to match BibTeX entries: @type{key, fields}
-            var entryPattern = @"@(\w+)\s*\{\s*([^,]+),\s*(.*?)\n\s*\}";
-            var matches = Regex.Matches(bibTexString, entryPattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            // Split by @ symbol to isolate individual entries
+            var bibEntries = bibTexString.Split('@', StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (Match match in matches)
+            foreach (var bibEntry in bibEntries)
             {
                 try
                 {
-                    var entry = new BibliographyEntry();
-                    var sourceTypeStr = match.Groups[1].Value.Trim();
-                    var fieldsStr = match.Groups[3].Value;
-
-                    // Parse source type
-                    if (!Enum.TryParse<SourceType>(sourceTypeStr, true, out var sourceType))
-                        sourceType = SourceType.Book;
-                    entry.SourceType = sourceType;
-
-                    // Parse fields into a dictionary
-                    var fields = ParseBibTexFields(fieldsStr);
-
-                    // Map BibTeX fields to BibliographyEntry properties
-                    if (fields.TryGetValue("title", out var title))
-                        entry.Title = CleanBibTexValue(title);
-
-                    if (fields.TryGetValue("publisher", out var publisher))
-                        entry.Publisher = CleanBibTexValue(publisher);
-
-                    if (fields.TryGetValue("doi", out var doi))
-                        entry.DigitalObjectIdentifier = CleanBibTexValue(doi);
-
-                    if (fields.TryGetValue("url", out var url))
-                        entry.Url = CleanBibTexValue(url);
-
-                    if (fields.TryGetValue("journal", out var journal))
-                        entry.ContainerTitle = CleanBibTexValue(journal);
-
-                    if (fields.TryGetValue("volume", out var volume))
-                        entry.Volume = CleanBibTexValue(volume);
-
-                    if (fields.TryGetValue("number", out var issue))
-                        entry.Issue = CleanBibTexValue(issue);
-
-                    if (fields.TryGetValue("pages", out var pages))
-                        entry.Pages = CleanBibTexValue(pages);
-
-                    // Parse authors/editors
-                    ParseContributors(fields, entry);
-
-                    // Parse publication date
-                    if (fields.TryGetValue("year", out var year))
-                    {
-                        if (int.TryParse(CleanBibTexValue(year), out var yearInt))
-                        {
-                            entry.PublicationDate = new PublicationDate { Year = yearInt };
-
-                            if (fields.TryGetValue("month", out var month))
-                            {
-                                var monthValue = CleanBibTexValue(month);
-                                if (int.TryParse(monthValue, out var monthInt))
-                                    entry.PublicationDate.Month = monthInt;
-                            }
-                        }
-                    }
-
-                    // Parse access date for websites
-                    if (fields.TryGetValue("urldate", out var accessDate))
-                    {
-                        if (DateOnly.TryParse(CleanBibTexValue(accessDate), out var accessDateOnly))
-                            entry.AccessDate = accessDateOnly;
-                    }
-
-                    entries.Add(entry);
+                    var entry = ParseSingleBibEntry(bibEntry);
+                    if (entry != null)
+                        entries.Add(entry);
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Log or handle parsing errors as needed
-                    continue;
+                    System.Diagnostics.Debug.WriteLine($"Error parsing BibTeX entry: {ex.Message}");
                 }
             }
 
             return entries;
         }
 
-        private Dictionary<string, string> ParseBibTexFields(string fieldsStr)
+        private static BibliographyEntry? ParseSingleBibEntry(string bibEntry)
+        {
+            // Extract entry type and key
+            var typeAndKeyMatch = System.Text.RegularExpressions.Regex.Match(
+                bibEntry, 
+                @"^(\w+)\s*\{\s*([^,]+)", 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase
+            );
+
+            if (!typeAndKeyMatch.Success)
+                return null;
+
+            var entryType = typeAndKeyMatch.Groups[1].Value.ToLower();
+            var entryKey = typeAndKeyMatch.Groups[2].Value.Trim();
+
+            // Extract all key-value pairs
+            var fields = ExtractBibFields(bibEntry);
+
+            // Create the bibliography entry
+            var entry = new BibliographyEntry
+            {
+                SourceType = MapSourceType(entryType),
+                Title = ExtractFieldValue(fields, "title") ?? string.Empty,
+                Publisher = ExtractFieldValue(fields, "publisher"),
+                DigitalObjectIdentifier = ExtractFieldValue(fields, "doi"),
+                Url = ExtractFieldValue(fields, "url"),
+                ContainerTitle = ExtractFieldValue(fields, "journal") ?? ExtractFieldValue(fields, "booktitle"),
+                Volume = ExtractFieldValue(fields, "volume"),
+                Issue = ExtractFieldValue(fields, "number"),
+                Pages = ExtractFieldValue(fields, "pages"),
+            };
+
+            // Parse publication date
+            var yearStr = ExtractFieldValue(fields, "year");
+            var monthStr = ExtractFieldValue(fields, "month");
+            if (!string.IsNullOrEmpty(yearStr) && int.TryParse(yearStr, out var year))
+            {
+                entry.PublicationDate = new PublicationDate { Year = year };
+                
+                if (!string.IsNullOrEmpty(monthStr) && int.TryParse(monthStr, out var month))
+                    entry.PublicationDate.Month = month;
+            }
+
+            // Parse access date (for websites)
+            var accessDateStr = ExtractFieldValue(fields, "accessdate");
+            if (!string.IsNullOrEmpty(accessDateStr) && DateOnly.TryParse(accessDateStr, out var accessDate))
+                entry.AccessDate = accessDate;
+
+            // Parse contributors (authors, editors, etc.)
+            ParseContributors(fields, entry);
+
+            return entry;
+        }
+
+        private static Dictionary<string, string> ExtractBibFields(string bibEntry)
         {
             var fields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var fieldPattern = @"(\w+)\s*=\s*([{""'].*?[}""']|[^,}]+)";
-            var matches = Regex.Matches(fieldsStr, fieldPattern, RegexOptions.IgnoreCase);
+            
+            // Remove the entry type and key prefix
+            var contentStart = bibEntry.IndexOf('{');
+            var contentEnd = bibEntry.LastIndexOf('}');
+            
+            if (contentStart < 0 || contentEnd < 0 || contentStart >= contentEnd)
+                return fields;
 
-            foreach (Match match in matches)
+            var content = bibEntry.Substring(contentStart + 1, contentEnd - contentStart - 1);
+
+            // Split by commas, but be careful with nested braces
+            var fieldStrings = SplitByCommaRespectingBraces(content);
+
+            foreach (var fieldString in fieldStrings)
             {
-                var fieldName = match.Groups[1].Value.Trim();
-                var fieldValue = match.Groups[2].Value.Trim();
-                fields[fieldName] = fieldValue;
+                var parts = fieldString.Split(new[] { '=' }, 2, StringSplitOptions.TrimEntries);
+                if (parts.Length == 2)
+                {
+                    var key = parts[0].Trim();
+                    var value = CleanBibValue(parts[1].Trim());
+                    fields[key] = value;
+                }
             }
 
             return fields;
         }
 
-        private string CleanBibTexValue(string value)
+        private static List<string> SplitByCommaRespectingBraces(string content)
+        {
+            var result = new List<string>();
+            var current = new System.Text.StringBuilder();
+            var braceDepth = 0;
+
+            foreach (var ch in content)
+            {
+                if (ch == '{')
+                    braceDepth++;
+                else if (ch == '}')
+                    braceDepth--;
+                else if (ch == ',' && braceDepth == 0)
+                {
+                    result.Add(current.ToString());
+                    current.Clear();
+                    continue;
+                }
+
+                current.Append(ch);
+            }
+
+            if (current.Length > 0)
+                result.Add(current.ToString());
+
+            return result;
+        }
+
+        private static string CleanBibValue(string value)
         {
             // Remove surrounding braces or quotes
-            value = Regex.Replace(value, @"^[{""']|[}""']$", "").Trim();
-            // Remove inner braces used for case protection
-            value = Regex.Replace(value, @"\{|\}", "");
-            return value;
+            value = value.Trim();
+            
+            if ((value.StartsWith("{") && value.EndsWith("}")) ||
+                (value.StartsWith("\"") && value.EndsWith("\"")))
+            {
+                value = value.Substring(1, value.Length - 2);
+            }
+
+            // Remove LaTeX commands (basic cleanup)
+            value = System.Text.RegularExpressions.Regex.Replace(value, @"\\[a-z]+\{([^}]*)\}", "$1");
+            value = System.Text.RegularExpressions.Regex.Replace(value, @"~", " ");
+
+            return value.Trim();
         }
 
-        private void ParseContributors(Dictionary<string, string> fields, BibliographyEntry entry)
+        private static string? ExtractFieldValue(Dictionary<string, string> fields, string fieldName)
         {
-            var authorPattern = @"(\w+)\s+(\w+)";
+            return fields.TryGetValue(fieldName, out var value) && !string.IsNullOrEmpty(value) ? value : null;
+        }
 
-            if (fields.TryGetValue("author", out var authorsStr))
+        private static SourceType MapSourceType(string bibEntryType)
+        {
+            return bibEntryType switch
             {
-                var authors = authorsStr.Split(new[] { " and " }, StringSplitOptions.None);
+                "book" => SourceType.Book,
+                "article" => SourceType.Journal,
+                "website" or "misc" => SourceType.Website,
+                "report" or "techreport" => SourceType.Report,
+                _ => SourceType.Book // Default fallback
+            };
+        }
+
+        private static void ParseContributors(Dictionary<string, string> fields, BibliographyEntry entry)
+        {
+            // Parse authors
+            var authorsStr = ExtractFieldValue(fields, "author");
+            if (!string.IsNullOrEmpty(authorsStr))
+            {
+                var authors = ParseAuthorString(authorsStr);
                 foreach (var author in authors)
                 {
-                    var match = Regex.Match(author.Trim(), authorPattern);
-                    if (match.Success)
-                    {
-                        entry.Contributors.Add(new Contributor
-                        {
-                            FirstName = match.Groups[1].Value,
-                            LastName = match.Groups[2].Value,
-                            Role = ContributorRole.Author
-                        });
-                    }
+                    author.Role = ContributorRole.Author;
+                    entry.Contributors.Add(author);
                 }
             }
 
-            if (fields.TryGetValue("editor", out var editorsStr))
+            // Parse editors
+            var editorsStr = ExtractFieldValue(fields, "editor");
+            if (!string.IsNullOrEmpty(editorsStr))
             {
-                var editors = editorsStr.Split(new[] { " and " }, StringSplitOptions.None);
+                var editors = ParseAuthorString(editorsStr);
                 foreach (var editor in editors)
                 {
-                    var match = Regex.Match(editor.Trim(), authorPattern);
-                    if (match.Success)
-                    {
-                        entry.Contributors.Add(new Contributor
-                        {
-                            FirstName = match.Groups[1].Value,
-                            LastName = match.Groups[2].Value,
-                            Role = ContributorRole.Editor
-                        });
-                    }
+                    editor.Role = ContributorRole.Editor;
+                    entry.Contributors.Add(editor);
                 }
             }
         }
 
+        private static List<Contributor> ParseAuthorString(string authorString)
+        {
+            var contributors = new List<Contributor>();
+            
+            // Split by " and " (BibTeX standard)
+            var authorParts = authorString.Split(new[] { " and " }, StringSplitOptions.TrimEntries);
+
+            foreach (var authorPart in authorParts)
+            {
+                var names = authorPart.Split(',');
+                
+                if (names.Length == 2)
+                {
+                    // Format: "LastName, FirstName"
+                    contributors.Add(new Contributor
+                    {
+                        LastName = names[0].Trim(),
+                        FirstName = names[1].Trim()
+                    });
+                }
+                else
+                {
+                    // Format: "FirstName LastName" - simple split on last space
+                    var trimmed = authorPart.Trim();
+                    var lastSpace = trimmed.LastIndexOf(' ');
+                    
+                    if (lastSpace > 0)
+                    {
+                        contributors.Add(new Contributor
+                        {
+                            FirstName = trimmed.Substring(0, lastSpace).Trim(),
+                            LastName = trimmed.Substring(lastSpace + 1).Trim()
+                        });
+                    }
+                    else
+                    {
+                        contributors.Add(new Contributor { LastName = trimmed });
+                    }
+                }
+            }
+
+            return contributors;
+        }
     }
 }

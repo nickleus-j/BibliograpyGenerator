@@ -4,20 +4,138 @@
              x:Class="Bibliography.Maui.MainPage">
 
     <ScrollView>
-        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*">
-            <Label Grid.Row="0"
-                   Grid.ColumnSpan="2"
-                   Text="User Information"
-                   FontSize="Title" />
-            <Label Grid.Row="1"
-                   Grid.ColumnSpan="2"
-                   Text="Use this Screen to Modify User Information."
-                   FontSize="Body" />
-            <BoxView Grid.Row="2"
-                     Grid.ColumnSpan="2"
-                     HeightRequest="1"
-                     Color="Black" />
+         <Grid RowDefinitions="auto,*,auto" Padding="16" RowSpacing="16">
+        
+        <!-- Header Section -->
+        <VerticalStackLayout Grid.Row="0" Spacing="8">
+            <Label Text="BibTeX Parser" 
+                   FontSize="24" 
+                   FontAttributes="Bold"
+                   TextColor="#333333"/>
+            <Label Text="Paste your BibTeX entries below and click Parse to generate the bibliography table."
+                   FontSize="12"
+                   TextColor="#666666"/>
+        </VerticalStackLayout>
+
+        <!-- Main Content Section -->
+        <Grid Grid.Row="1" RowDefinitions="auto,*,auto" ColumnDefinitions="*" RowSpacing="12">
+            
+            <!-- Input Section -->
+            <VerticalStackLayout Grid.Row="0" Spacing="8">
+                <Label Text="BibTeX Input" 
+                       FontSize="14" 
+                       FontAttributes="Bold"
+                       TextColor="#333333"/>
+                
+                <Editor x:Name="BibTexInput"
+                        Placeholder="Paste your BibTeX entries here (e.g., @article{...}, @book{...})"
+                        PlaceholderColor="#cccccc"
+                        BackgroundColor="White"
+                        TextColor="#333333"
+                        FontSize="12"
+                        HeightRequest="150"
+                        />
+                
+                <Button x:Name="ParseButton"
+                        Text="Parse BibTeX"
+                        Clicked="OnParseClicked"
+                        BackgroundColor="#0066cc"
+                        TextColor="White"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        Padding="12"
+                        CornerRadius="8"
+                        HeightRequest="48"/>
+            </VerticalStackLayout>
+
+            <!-- Results Section -->
+            <VerticalStackLayout Grid.Row="1" Spacing="8">
+                <Label Text="Bibliography Entries" 
+                       FontSize="14" 
+                       FontAttributes="Bold"
+                       TextColor="#333333"/>
+                
+                <!-- Data Grid (using CollectionView with custom template) -->
+                <CollectionView x:Name="BibliographyGrid"
+                                SelectionMode="Single">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <VerticalStackLayout Padding="12" Spacing="8" BackgroundColor="White">
+                                
+                                <!-- Entry Header -->
+                                <Grid ColumnDefinitions="*,auto" ColumnSpacing="8">
+                                    <Label Text="{Binding Title, StringFormat='📚 {0}'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="#0066cc"
+                                           Grid.Column="0"
+                                           LineBreakMode="WordWrap"/>
+                                    <Label Grid.Column="2" TextColor="#00aa55"
+                                           Text="{Binding PublicationDate.Year, StringFormat='({0})'}"/>
+                                </Grid>
+                                <HorizontalStackLayout>
+                                    <Label FontSize="16" Text="{Binding Publisher, StringFormat='Publisher: {0}'}"/>
+                                    <Label TextColor="#117722" Text="{Binding SourceType, StringFormat='Type: {0}'}" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Empty State Message -->
+                <StackLayout x:Name="EmptyStateView"
+                             Padding="24"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"
+                             IsVisible="True">
+                    <Label Text="📝"
+                           FontSize="48"
+                           HorizontalOptions="Center"
+                           TextColor="#cccccc"/>
+                    <Label Text="No entries yet"
+                           FontSize="14"
+                           HorizontalOptions="Center"
+                           TextColor="#999999"
+                           Margin="0,8,0,0"/>
+                    <Label Text="Paste BibTeX and click Parse to get started"
+                           FontSize="12"
+                           HorizontalOptions="Center"
+                           TextColor="#cccccc"/>
+                </StackLayout>
+            </VerticalStackLayout>
+
+            <!-- Footer Section -->
+            <StackLayout Grid.Row="2" Spacing="8" Orientation="Horizontal">
+                <Label x:Name="EntryCountLabel"
+                       Text="0 entries"
+                       FontSize="12"
+                       TextColor="#666666"
+                       VerticalOptions="Center"/>
+                <Button x:Name="ClearButton"
+                        Text="Clear"
+                        Clicked="OnClearClicked"
+                        BackgroundColor="#ff6b6b"
+                        TextColor="White"
+                        FontSize="12"
+                        Padding="12,8"
+                        CornerRadius="6"
+                        HorizontalOptions="End"
+                        HeightRequest="40"/>
+                <Button x:Name="ExportButton"
+                        Text="Export"
+                        Clicked="OnExportClicked"
+                        BackgroundColor="#51cf66"
+                        TextColor="White"
+                        FontSize="12"
+                        Padding="12,8"
+                        CornerRadius="6"
+                        HeightRequest="40"/>
+            </StackLayout>
         </Grid>
+    </Grid>
     </ScrollView>
 
 </ContentPage>
