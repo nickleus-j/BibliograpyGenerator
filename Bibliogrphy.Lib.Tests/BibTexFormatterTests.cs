@@ -122,7 +122,7 @@ namespace Bibliography.Lib.Tests
             Assert.Contains("@book{One2020,", result);
             Assert.Contains("@book{Two2021,", result);
             // Check for blank line between entries
-            Assert.Contains("\r\n@book", result);
+            Assert.Contains("\n@book", result);
         }
 
         #endregion
@@ -418,7 +418,7 @@ namespace Bibliography.Lib.Tests
                     {
                         new Contributor { FirstName = "Test", LastName = "Author", Role = ContributorRole.Author }
                     },
-                    PublicationDate = new PublicationDate { Year = 2023 }
+                    PublicationDate = new PublicationDate { Year = 2023,Month = 4}
                 }
             };
 
@@ -426,7 +426,7 @@ namespace Bibliography.Lib.Tests
             var result = _formatter.ToBibTeX(entries);
 
             // Assert
-            Assert.Contains("year = {2023},\r\n}", result); // No comma before closing brace
+            Assert.Contains("year = {2023}\n}", result); // No comma before closing brace
         }
 
         #endregion

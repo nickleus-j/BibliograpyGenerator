@@ -138,7 +138,7 @@ namespace Bibliography.Lib.Formatters
                 // Remove trailing comma from previous line if no DOI/URL
                 if (sb.Length > 0 && sb[sb.Length - 2] == ',')
                 {
-                    sb.Length -= 3; // Remove ",\r\n"
+                    sb.Length -= 2; // Remove ",\r\n"
                     sb.AppendLine();
                 }
             }
