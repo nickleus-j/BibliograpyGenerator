@@ -20,6 +20,7 @@ namespace Bibliography.Lib.Models
 
         public PublicationDate? PublicationDate { get; set; }=new PublicationDate { Day=1,Month=1,Year=DateTime.Now.Year};
 
+        public string? JournalName { get; set; }
         public string? Publisher { get; set; }
         public string? DigitalObjectIdentifier { get; set; }
         public string? Url { get; set; }

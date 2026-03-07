@@ -23,12 +23,44 @@ public class ApaBiblioFormatter:IBibliographyStyleFormatter
     }
     private string FormatApa(BibliographyEntry entry)
     {
+        return entry.SourceType switch
+        {
+            SourceType.Book => FormatApaBooks(entry),
+            SourceType.Website => FormatApaWebsite(entry),
+            SourceType.Journal => FormatApaJournalArticle(entry),
+            _ => FormatApaBooks(entry)
+        };
+    }
+
+    private string FormatApaBooks(BibliographyEntry entry)
+    {
         var authors = entry.Contributors
             .Where(c => c.Role == ContributorRole.Author)
             .ToList();
         var authorString = FormatAuthors(authors);
         var year = entry.PublicationDate?.Year.ToString() ?? "n.d.";
         return $"{authorString} ({year}). {entry.Title}. {entry.Publisher}.";
+    }
+
+    private string FormatApaWebsite(BibliographyEntry entry)
+    {
+        var authors = entry.Contributors.Where(c => c.Role == ContributorRole.Author).ToList();
+        var authorString = FormatAuthors(authors);
+        var year = entry.PublicationDate?.Year.ToString() ?? "n.d.";
+        var accessDate = entry.AccessDate?.ToString("MMMM d, yyyy") ?? "";
+        return $"{authorString} ({year}). {entry.Title}. Retrieved from {entry.Url}";
+    }
+
+    private string FormatApaJournalArticle(BibliographyEntry entry)
+    {
+        var authors = entry.Contributors.Where(c => c.Role == ContributorRole.Author).ToList();
+        var authorString = FormatAuthors(authors);
+        var year = entry.PublicationDate?.Year.ToString() ?? "n.d.";
+        var volume = entry.Volume!=null ? $"*{entry.JournalName}*, {entry.Volume}" : entry.JournalName;
+        var issue = entry.Issue!= null ? $"({entry.Issue})" : "";
+        var pages = entry.Pages ?? "";
+        var doi = !string.IsNullOrEmpty(entry.DigitalObjectIdentifier) ? $" https://doi.org/{entry.DigitalObjectIdentifier}" : "";
+        return $"{authorString} ({year}). {entry.Title}. {volume}{issue}, {pages}.{doi}";
     }
     private string FormatAuthors(List<Contributor> authors)
     {

@@ -36,13 +36,12 @@
                 <local:BibliographyEntryControl DataContext="{Binding ElementName=ReferenceList, Path=SelectedItem}"/>
             </StackPanel>
         </ScrollViewer>
-        <StackPanel DockPanel.Dock="Top" Margin="3">
-            
-            <DockPanel>
-                <WrapPanel DockPanel.Dock="Top">
+        <ScrollViewer DockPanel.Dock="Right" Margin="3">
+            <StackPanel>
+                <WrapPanel>
                     <!-- List Section -->
-                    <GroupBox Header="Bibliography Entries" Grid.Row="0" Grid.Column="1" Margin="5">
-                        <DataGrid ItemsSource="{Binding Entries}" AutoGenerateColumns="False" IsReadOnly="True" FontFamily="Consolas">
+                    <GroupBox Header="Bibliography Entries" Grid.Row="0" Grid.Column="1" Margin="5" FontFamily="Consolas" FontSize="14">
+                        <DataGrid ItemsSource="{Binding Entries}" AutoGenerateColumns="False" IsReadOnly="True">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="200"/>
                                 <DataGridTextColumn Header="Source Type" Binding="{Binding SourceType}" Width="100"/>
@@ -52,23 +51,22 @@
                         </DataGrid>
                     </GroupBox>
                 </WrapPanel>
-                <WrapPanel DockPanel.Dock="Bottom">
+                <WrapPanel>
                     <Label Content="Citation Style:" Width="80"/>
-                    <ComboBox ItemsSource="{Binding Source={x:Static local:CitationStyleEnumValues.All}}" SelectedItem="{Binding CitationStyle}" Width="150" FontFamily="Segoe UI Semibold"/>
+                    <ComboBox ItemsSource="{Binding Source={x:Static local:CitationStyleEnumValues.All}}" SelectedItem="{Binding CitationStyle}" Width="150" FontFamily="Segoe UI Semibold" FontSize="14"/>
                 </WrapPanel>
-                
-            </DockPanel>
-            <StackPanel Orientation="Horizontal" Margin="5" DockPanel.Dock="Left">
-                <Button Content="Generate Text" Command="{Binding GenerateTextCommand}" Margin="5" FontSize="16"/>
-                <Button Content="Generate BibTeX" Command="{Binding GenerateBibTeXCommand}" Margin="5" FontSize="16"/>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <Button Content="Generate Text" Command="{Binding GenerateTextCommand}" Margin="5" FontSize="16"/>
+                    <Button Content="Generate BibTeX" Command="{Binding GenerateBibTeXCommand}" Margin="5" FontSize="16"/>
+                </StackPanel>
+                <TextBox Text="{Binding GeneratedOutput}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" MinHeight="100" FontFamily="Courier New"/>
+                <GroupBox Header="Enter BibTex To Parse" Margin="5">
+                    <StackPanel>
+                        <TextBox Text="{Binding BibTexForParse}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"  MinHeight="100" FontFamily="Courier New"/>
+                        <Button Content="Load BibTex" FontSize="14" Command="{Binding ParseBibTeXCommand}"/>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-            <TextBox Text="{Binding GeneratedOutput}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" MinHeight="100" FontFamily="Courier New"/>
-        </StackPanel>
-        <GroupBox Header="Enter BibTex To Parse" Margin="5" DockPanel.Dock="Bottom">
-            <StackPanel>
-                <TextBox Text="{Binding BibTexForParse}" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"  MinHeight="100" FontFamily="Courier New"/>
-                <Button Content="Load BibTex" FontSize="14" Command="{Binding ParseBibTeXCommand}"/>
-            </StackPanel>
-        </GroupBox>
+        </ScrollViewer>
     </DockPanel>
 </Window>
