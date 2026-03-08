@@ -21,20 +21,6 @@ namespace Bibliography.Lib.Formatters
             return Instance;
         }
 
-        private string SanitizeKey(string title)
-        {
-            if (string.IsNullOrEmpty(title))
-                return "unknown";
-
-            // Remove spaces and special chars for BibTeX key
-            var invalidChars = new[] { ' ', '{', '}', ':', ';', ',', '.', '-', '_', '?', '!' };
-            var sanitized = title;
-            foreach (var ch in invalidChars)
-                sanitized = sanitized.Replace(ch.ToString(), "");
-
-            return sanitized.Length > 10 ? sanitized.Substring(0, 10) : sanitized;
-        }
-
         public string ToBibTeX(IEnumerable<BibliographyEntry> entries)
         {
             if (entries == null)
@@ -138,7 +124,7 @@ namespace Bibliography.Lib.Formatters
                 // Remove trailing comma from previous line if no DOI/URL
                 if (sb.Length > 0 && sb[sb.Length - 2] == ',')
                 {
-                    sb.Length -= 2; // Remove ",\r\n"
+                    sb.Length -= 2; // Remove ",\n"
                     sb.AppendLine();
                 }
                 if (sb.Length > 0 && sb[sb.Length - 3] == ',')

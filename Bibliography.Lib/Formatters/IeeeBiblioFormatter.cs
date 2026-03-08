@@ -21,13 +21,111 @@ public class IeeeBiblioFormatter:IBibliographyStyleFormatter
 
         return sb.ToString().TrimEnd();
     }
-    private string FormatBibliographyEntry(BibliographyEntry entry,int index)
+    private string FormatBibliographyEntry(BibliographyEntry entry, int index)
+    {
+        return entry.SourceType switch
+        {
+            SourceType.Book => FormatBook(entry, index),
+            SourceType.Journal => FormatJournal(entry, index),
+            SourceType.Website => FormatWebsite(entry, index),
+            SourceType.Report => FormatReport(entry, index),
+            _ => FormatDefault(entry, index)
+        };
+    }
+
+    private string FormatBook(BibliographyEntry entry, int index)
     {
         var authors = entry.Contributors
             .Where(c => c.Role == ContributorRole.Author)
             .ToList();
+
         var authorString = FormatAuthors(authors);
-        return $"[{index}] {authorString}, \"{entry.Title},\" {entry.Publisher}, {entry.PublicationDate?.Year}.";
+        var year = entry.PublicationDate?.Year ?? DateTime.Now.Year;
+
+        return $"[{index}] {authorString}, \"{entry.Title},\" {entry.Publisher}, {year}.";
+    }
+
+    private string FormatJournal(BibliographyEntry entry, int index)
+    {
+        var authors = entry.Contributors
+            .Where(c => c.Role == ContributorRole.Author)
+            .ToList();
+
+        var authorString = FormatAuthors(authors);
+        var year = entry.PublicationDate?.Year ?? DateTime.Now.Year;
+
+        var result = $"[{index}] {authorString}, \"{entry.Title},\" {entry.ContainerTitle}";
+
+        if (!string.IsNullOrEmpty(entry.Volume))
+            result += $", vol. {entry.Volume}";
+
+        if (!string.IsNullOrEmpty(entry.Issue))
+            result += $", no. {entry.Issue}";
+
+        if (!string.IsNullOrEmpty(entry.Pages))
+            result += $", pp. {entry.Pages}";
+
+        result += $", {year}.";
+
+        if (!string.IsNullOrEmpty(entry.DigitalObjectIdentifier))
+            result += $" doi: {entry.DigitalObjectIdentifier}";
+
+        return result;
+    }
+
+    private string FormatWebsite(BibliographyEntry entry, int index)
+    {
+        var authors = entry.Contributors
+            .Where(c => c.Role == ContributorRole.Author)
+            .ToList();
+
+        var authorString = authors.Any() ? FormatAuthors(authors) : "Unknown Author";
+        var year = entry.PublicationDate?.Year ?? DateTime.Now.Year;
+
+        var result = $"[{index}] {authorString}, \"{entry.Title},\"";
+
+        if (!string.IsNullOrEmpty(entry.Url))
+            result += $" [Online]. Available: {entry.Url}";
+
+        result += $" [Accessed: {(entry.AccessDate.HasValue ? entry.AccessDate.Value.ToString("MMM. dd, yyyy") : "date unknown")}].";
+
+        return result;
+    }
+
+    private string FormatReport(BibliographyEntry entry, int index)
+    {
+        var authors = entry.Contributors
+            .Where(c => c.Role == ContributorRole.Author)
+            .ToList();
+
+        var authorString = FormatAuthors(authors);
+        var year = entry.PublicationDate?.Year ?? DateTime.Now.Year;
+
+        var result = $"[{index}] {authorString}, \"{entry.Title},\" Tech. Rep.";
+
+        if (!string.IsNullOrEmpty(entry.Publisher))
+            result += $" {entry.Publisher}";
+
+        result += $", {year}.";
+
+        if (!string.IsNullOrEmpty(entry.DigitalObjectIdentifier))
+            result += $" doi: {entry.DigitalObjectIdentifier}";
+        else if (!string.IsNullOrEmpty(entry.Url))
+            result += $" [Online]. Available: {entry.Url}";
+
+        return result;
+    }
+
+    private string FormatDefault(BibliographyEntry entry, int index)
+    {
+        var authors = entry.Contributors
+            .Where(c => c.Role == ContributorRole.Author)
+            .ToList();
+
+        var authorString = FormatAuthors(authors);
+        var year = entry.PublicationDate?.Year ?? DateTime.Now.Year;
+
+        return $"[{index}] {authorString}, \"{entry.Title},\" {year}.";
     }
     private string FormatAuthors(List<Contributor> authors)
     {

@@ -26,11 +26,67 @@ public class MlaBiblioFormatter:IBibliographyStyleFormatter
     }
     private string FormatMla(BibliographyEntry entry)
     {
-        var authors = entry.Contributors
+        return entry.SourceType switch
+        {
+            SourceType.Book => FormatBook(entry),
+            SourceType.Journal => FormatJournal(entry),
+            SourceType.Website => FormatWebpage(entry),
+            SourceType.Report => FormatTechnicalReport(entry),
+            _ => throw new ArgumentException($"Unsupported source type: {entry.SourceType}")
+        };
+    }
+
+    private string FormatBook(BibliographyEntry entry)
+    {
+        var authorString = FormatAuthors(GetAuthors(entry));
+        return $"{authorString}. {entry.Title}. {entry.Publisher}, {entry.PublicationDate?.Year}.";
+    }
+
+    private string FormatJournal(BibliographyEntry entry)
+    {
+        var authorString = FormatAuthors(GetAuthors(entry));
+        var year = entry.PublicationDate?.Year;
+        var volume = entry.Volume ?? string.Empty;
+        var issue = entry.Issue ?? string.Empty;
+        var pages = entry.Pages ?? string.Empty;
+
+        // MLA format: Author(s). "Article Title." Journal Title, vol. #, no. #, Year, pp. page range.
+        var issueInfo = !string.IsNullOrEmpty(issue) ? $", no. {issue}" : string.Empty;
+        var pageInfo = !string.IsNullOrEmpty(pages) ? $", pp. {pages}" : string.Empty;
+
+        return $"{authorString}. \"{entry.Title}.\" {entry.Publisher}, vol. {volume}{issueInfo}, {year}{pageInfo}.";
+    }
+
+    private string FormatWebpage(BibliographyEntry entry)
+    {
+        var authorString = FormatAuthors(GetAuthors(entry));
+        var year = entry.PublicationDate?.Year.ToString() ?? "n.d.";
+        var url = entry.Url ?? string.Empty;
+        var accessDate = entry.AccessDate?.ToString("d MMM. yyyy") ?? string.Empty;
+
+        // MLA format: Author(s). "Page Title." Website Name, Year, URL. Accessed date.
+        var accessInfo = !string.IsNullOrEmpty(accessDate) ? $" Accessed {accessDate}." : string.Empty;
+
+        return $"{authorString}. \"{entry.Title}.\" {entry.Publisher}, {year}, {url}.{accessInfo}";
+    }
+
+    private string FormatTechnicalReport(BibliographyEntry entry)
+    {
+        var authorString = FormatAuthors(GetAuthors(entry));
+        var year = entry.PublicationDate?.Year;
+        var reportNumber = entry.Issue ?? string.Empty;
+        var organization = entry.Publisher ?? entry.Publisher ?? string.Empty;
+
+        // MLA format: Author(s). Title of Report. Report Number, Organization, Year.
+        var reportInfo = !string.IsNullOrEmpty(reportNumber) ? $"{reportNumber}, " : string.Empty;
+
+        return $"{authorString}. {entry.Title}. {reportInfo}{organization}, {year}.";
+    }
+    private List<Contributor> GetAuthors(BibliographyEntry entry)
+    {
+        return entry.Contributors
             .Where(c => c.Role == ContributorRole.Author)
             .ToList();
-        var authorString = FormatAuthors(authors);
-        return $"{authorString}. {entry.Title}. {entry.Publisher}, {entry.PublicationDate?.Year}.";
     }
     private string FormatAuthors(List<Contributor> authors)
     {
