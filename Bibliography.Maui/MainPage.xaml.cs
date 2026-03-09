@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Bibliography.Lib.Formatters;
 using Bibliography.Lib.Models;
 using Bibliography.Lib.Parsers;
 
@@ -66,6 +67,15 @@ public partial class MainPage : ContentPage
         }
     }
 
+    private string GenerateApa()
+    {
+        var formatter = CitationStyleFormatterFactory.GetFormatter(CitationStyle.APA);
+        return formatter.FormatBibliography(_bibliographyEntries);
+    }
+    private void OnApaClicked(object sender, EventArgs e)
+    {
+        Apa.Text = GenerateApa();
+    }
     private void OnClearClicked(object sender, EventArgs e)
     {
         BibTexInput.Text = string.Empty;
