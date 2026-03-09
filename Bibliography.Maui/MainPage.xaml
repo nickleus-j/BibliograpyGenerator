@@ -135,6 +135,25 @@
                            HorizontalOptions="Center"
                            TextColor="#cccccc"/>
                 </StackLayout>
+                <Editor x:Name="Apa"
+                        Placeholder="Paste your BibTeX entries here (e.g., @article{...}, @book{...})"
+                        PlaceholderColor="#cccccc"
+                        BackgroundColor="White"
+                        TextColor="#333333"
+                        FontSize="12"
+                        HeightRequest="150"
+                />
+                
+                <Button x:Name="ApaButton"
+                        Text="Generate APA"
+                        Clicked="OnApaClicked"
+                        BackgroundColor="#0055aa"
+                        TextColor="White"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        Padding="12"
+                        CornerRadius="8"
+                        HeightRequest="48"/>
             </VerticalStackLayout>
 
             <!-- Footer Section -->
