@@ -69,8 +69,8 @@ public partial class MainPage : ContentPage
 
     private string GenerateApa()
     {
-        var formatter = CitationStyleFormatterFactory.GetFormatter(CitationStyle.APA);
-        return formatter.FormatBibliography(_bibliographyEntries);
+        var formatter = BibliographyFormatter.GetInstance().FormatBibliography(_bibliographyEntries,CitationStyle.APA);
+        return formatter;
     }
     private void OnApaClicked(object sender, EventArgs e)
     {

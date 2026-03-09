@@ -7,21 +7,18 @@
          <Grid RowDefinitions="auto,*,auto" Padding="16" RowSpacing="16">
         
         <!-- Header Section -->
-        <VerticalStackLayout Grid.Row="0" Spacing="8">
-            <Label Text="BibTeX Parser" 
-                   FontSize="24" 
-                   FontAttributes="Bold"
-                   TextColor="#333333"/>
-            <Label Text="Paste your BibTeX entries below and click Parse to generate the bibliography table."
-                   FontSize="12"
-                   TextColor="#555"/>
-        </VerticalStackLayout>
-
-        <!-- Main Content Section -->
-        <Grid Grid.Row="1" RowDefinitions="auto,*,auto" ColumnDefinitions="*" RowSpacing="12">
-            
-            <!-- Input Section -->
-            <VerticalStackLayout Grid.Row="0" Spacing="8">
+        <Grid Grid.Row="0" ColumnDefinitions="*,*">
+            <VerticalStackLayout Grid.Column="0">
+                <Label Text="BibTeX Parser" 
+                       FontSize="24" 
+                       FontAttributes="Bold"
+                       TextColor="#333333"/>
+                <Label Text="Paste your BibTeX entries below and click Parse to generate the bibliography table."
+                       FontSize="12"
+                       TextColor="#555"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="1">
+                <!-- Input Section -->
                 <Label Text="BibTeX Input" 
                        FontSize="14" 
                        FontAttributes="Bold"
@@ -34,7 +31,7 @@
                         TextColor="#333333"
                         FontSize="12"
                         HeightRequest="150"
-                        />
+                />
                 
                 <Button x:Name="ParseButton"
                         Text="Parse BibTeX"
@@ -47,7 +44,12 @@
                         CornerRadius="8"
                         HeightRequest="48"/>
             </VerticalStackLayout>
+            
+        </Grid>
 
+        <!-- Main Content Section -->
+        <Grid Grid.Row="1" RowDefinitions="auto,*,auto" ColumnDefinitions="*" RowSpacing="12">
+            
             <!-- Results Section -->
             <VerticalStackLayout Grid.Row="1" Spacing="8">
                 <Label Text="Bibliography Entries" 
