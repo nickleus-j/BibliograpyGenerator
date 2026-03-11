@@ -45,9 +45,8 @@ public partial class MainPage : ContentPage
             }
 
             // Update UI
-            EmptyStateView.IsVisible = _bibliographyEntries.Count == 0;
             EntryCountLabel.Text = $"{_bibliographyEntries.Count} {(_bibliographyEntries.Count == 1 ? "entry" : "entries")}";
-            BibliographyGrid.IsVisible = !EmptyStateView.IsVisible;
+            BibliographyGrid.IsVisible = _bibliographyEntries.Any();
             if (BibliographyGrid.IsVisible)
             {
                 DisplayAlert("Success", $"Parsed {_bibliographyEntries.Count} bibliography entries.", "OK");
@@ -111,7 +110,6 @@ public partial class MainPage : ContentPage
     {
         BibTexInput.Text = string.Empty;
         _bibliographyEntries.Clear();
-        EmptyStateView.IsVisible = true;
         EntryCountLabel.Text = "0 entries";
     }
 

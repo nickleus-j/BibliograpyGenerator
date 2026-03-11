@@ -1,200 +1,176 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Bibliography.Maui.MainPage">
+             x:Class="Bibliography.Maui.MainPage"
+             BackgroundColor="{AppThemeBinding Light=#F5F6F8, Dark=#121212}">
 
-    <ScrollView>
-         <Grid RowDefinitions="auto,*,auto" Padding="16" RowSpacing="16">
+    <Grid RowDefinitions="*">
         
-        <!-- Header Section -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,*">
-            <VerticalStackLayout Grid.Column="0">
-                <Label Text="BibTeX Parser" 
-                       FontSize="24" 
-                       FontAttributes="Bold"
-                       TextColor="#333333"/>
-                <Label Text="Paste your BibTeX entries below and click Parse to generate the bibliography table."
-                       FontSize="12"
-                       TextColor="#555"/>
-            </VerticalStackLayout>
-            <VerticalStackLayout Grid.Column="1">
-                <!-- Input Section -->
-                <Label Text="BibTeX Input" 
-                       FontSize="14" 
-                       FontAttributes="Bold"
-                       TextColor="#333333"/>
-                
-                <Editor x:Name="BibTexInput"
-                        Placeholder="Paste your BibTeX entries here (e.g., @article{...}, @book{...})"
-                        PlaceholderColor="#cccccc"
-                        BackgroundColor="White"
-                        TextColor="#333333"
-                        FontSize="12"
-                        HeightRequest="150"
-                />
-                
-                <Button x:Name="ParseButton"
-                        Text="Parse BibTeX"
-                        Clicked="OnParseClicked"
-                        BackgroundColor="#0066cc"
-                        TextColor="White"
-                        FontSize="14"
-                        FontAttributes="Bold"
-                        Padding="12"
-                        CornerRadius="8"
-                        HeightRequest="48"/>
-            </VerticalStackLayout>
+        <CollectionView x:Name="BibliographyGrid"
+                        SelectionMode="Single"
+                        Margin="16,0">
             
-        </Grid>
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="16" Padding="0,16,0,16">
+                    
+                    <VerticalStackLayout Spacing="4" Margin="0,0,0,8">
+                        <Label Text="Bibliography Generator" 
+                               FontSize="28" 
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                        <Label Text="Parse BibTeX or lookup ISBNs to generate your citations."
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#666666, Dark=#A0A0A0}"/>
+                    </VerticalStackLayout>
 
-        <!-- Main Content Section -->
-        <Grid Grid.Row="1" RowDefinitions="auto,*,auto" ColumnDefinitions="*" RowSpacing="12">
-            
-            <!-- Results Section -->
-            <VerticalStackLayout Grid.Row="1" Spacing="8">
-                <Label Text="Bibliography Entries" 
-                       FontSize="14" 
-                       FontAttributes="Bold"
-                       TextColor="#333333"/>
-                
-                <!-- Data Grid (using CollectionView with custom template) -->
-                <CollectionView x:Name="BibliographyGrid"
-                                SelectionMode="Single">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8"/>
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <VerticalStackLayout Padding="12" Spacing="8" BackgroundColor="White">
-                                
-                                <!-- Entry Header -->
-                                <Grid ColumnDefinitions="*,auto" ColumnSpacing="8">
-                                    <Label Text="{Binding Title, StringFormat='📚 {0}'}"
-                                           FontSize="18"
-                                           FontAttributes="Bold"
-                                           TextColor="#0066cc"
-                                           Grid.Column="0"
-                                           LineBreakMode="WordWrap"/>
-                                    <Label Grid.Column="2" TextColor="#00aa55" FontSize="16"
-                                           Text="{Binding PublicationDate.Year, StringFormat='({0})'}"/>
-                                </Grid>
-                                <CollectionView ItemsSource="{Binding Contributors}"
-                                                SelectionMode="None">
-                                    <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="4"/>
-                                    </CollectionView.ItemsLayout>
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid ColumnDefinitions="auto,*" ColumnSpacing="2" Padding="8,4">
-                                                <Label Text="•" 
-                                                       FontSize="14"
-                                                       TextColor="#0066cc"
-                                                       Grid.Column="0"
-                                                       VerticalOptions="Start"/>
-                                                <HorizontalStackLayout Grid.Column="1" Spacing="2">
-                                                    <Label Text="{Binding FirstName, StringFormat='{0}'}"
-                                                           FontSize="12"
-                                                           TextColor="#333333"/>
-                                                    <Label Text="{Binding LastName}"
-                                                           FontSize="12"
-                                                           FontAttributes="Bold"
-                                                           TextColor="#333333"/>
-                                                    <Label Text="{Binding Role, StringFormat='({0})'}"
-                                                           FontSize="11"
-                                                           TextColor="#999999"/>
-                                                </HorizontalStackLayout>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                                <HorizontalStackLayout>
-                                    <Label FontSize="16" Text="{Binding Publisher, StringFormat='Publisher: {0}'}" Margin="5"/>
-                                    <Label TextColor="#117722" Text="{Binding SourceType, StringFormat='Type: {0}'}" />
-                                </HorizontalStackLayout>
-                                
+                    <FlexLayout Direction="Row" 
+                                Wrap="Wrap" 
+                                JustifyContent="SpaceBetween"
+                                AlignItems="Stretch">
+
+                        <Border StrokeShape="RoundRectangle 12" 
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#333333}" 
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}"
+                                Padding="16"
+                                Margin="0,0,0,16"
+                                FlexLayout.Basis="100%"
+                                FlexLayout.Grow="1">
+                            
+                            <VerticalStackLayout Spacing="12">
+                                <Label Text="BibTeX Input" FontAttributes="Bold" FontSize="16"/>
+                                <Editor x:Name="BibTexInput"
+                                        Placeholder="Paste entries here (@article{...})"
+                                        HeightRequest="120"
+                                        AutoSize="TextChanges"/>
+                                <Button x:Name="ParseButton"
+                                        Text="Parse BibTeX"
+                                        Clicked="OnParseClicked"
+                                        StyleClass="PrimaryAction"/>
                             </VerticalStackLayout>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                        </Border>
 
-                <!-- Empty State Message -->
-                <StackLayout x:Name="EmptyStateView"
-                             Padding="24"
-                             HorizontalOptions="Center"
-                             VerticalOptions="Center"
-                             IsVisible="True">
-                    <Label Text="📝"
-                           FontSize="48"
-                           HorizontalOptions="Center"
-                           TextColor="#cccccc"/>
-                    <Label Text="No entries yet"
-                           FontSize="14"
-                           HorizontalOptions="Center"
-                           TextColor="#999999"
-                           Margin="0,8,0,0"/>
-                    <Label Text="Paste BibTeX and click Parse to get started"
-                           FontSize="12"
-                           HorizontalOptions="Center"
-                           TextColor="#cccccc"/>
-                </StackLayout>
-                <Editor x:Name="Apa"
-                        Placeholder="Paste your BibTeX entries here (e.g., @article{...}, @book{...})"
-                        PlaceholderColor="#cccccc"
-                        BackgroundColor="White"
-                        TextColor="#333333"
-                        FontSize="12"
-                        HeightRequest="150"
-                />
-                
-                <Button x:Name="ApaButton"
-                        Text="Generate APA"
-                        Clicked="OnApaClicked"
-                        BackgroundColor="#0055aa"
-                        TextColor="White"
-                        FontSize="14"
-                        FontAttributes="Bold"
-                        Padding="12"
-                        CornerRadius="8"
-                        HeightRequest="48"/>
-                <Editor x:Name="isbnBox"/>
-                <HorizontalStackLayout>
-                    <Label Text="Google Books App name"/>
-                    <Editor x:Name="AppNameBox"/>
-                    <Label Text="Google Books Api Key"/>
-                    <Editor x:Name="ApiKeyBox"/>
-                </HorizontalStackLayout>
-                <Button x:Name="LookupBtn" Text="Lookup ISBN via Google Books" Clicked="OnLookupClicked"/>
-            </VerticalStackLayout>
+                        <Border StrokeShape="RoundRectangle 12" 
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#333333}" 
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}"
+                                Padding="16"
+                                Margin="0,0,0,16"
+                                FlexLayout.Basis="100%"
+                                FlexLayout.Grow="1">
+                            
+                            <VerticalStackLayout Spacing="12">
+                                <Label Text="Quick Add (Google Books)" FontAttributes="Bold" FontSize="16"/>
+                                
+                                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                    <Entry x:Name="isbnBox" 
+                                           Grid.Column="0" 
+                                           Placeholder="Enter ISBN" 
+                                           Keyboard="Numeric"/>
+                                    <ImageButton Grid.Column="1" 
+                                                 Source="camera_icon.png" 
+                                                 ToolTipProperties.Text="Scan Barcode"
+                                                 BackgroundColor="{AppThemeBinding Light=#E8F0FE, Dark=#2D3748}"
+                                                 CornerRadius="8"
+                                                 Padding="10"
+                                                 WidthRequest="48"
+                                                 HeightRequest="48"/>
+                                </Grid>
+                                
+                                <Button x:Name="LookupBtn" 
+                                        Text="Lookup ISBN" 
+                                        Clicked="OnLookupClicked"
+                                        StyleClass="SecondaryAction"/>
 
-            <!-- Footer Section -->
-            <StackLayout Grid.Row="2" Spacing="8" Orientation="Horizontal">
-                <Label x:Name="EntryCountLabel"
-                       Text="0 entries"
-                       FontSize="12"
-                       TextColor="#666666"
-                       VerticalOptions="Center"/>
-                <Button x:Name="ClearButton"
-                        Text="Clear"
-                        Clicked="OnClearClicked"
-                        BackgroundColor="#ff6b6b"
-                        TextColor="White"
-                        FontSize="12"
-                        Padding="12,8"
-                        CornerRadius="6"
-                        HorizontalOptions="End"
-                        HeightRequest="40"/>
-                <Button x:Name="ExportButton"
-                        Text="Export"
-                        Clicked="OnExportClicked"
-                        BackgroundColor="#51cf66"
-                        TextColor="White"
-                        FontSize="12"
-                        Padding="12,8"
-                        CornerRadius="6"
-                        HeightRequest="40"/>
-            </StackLayout>
-        </Grid>
+                                <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
+                                    <Entry x:Name="AppNameBox" Placeholder="App Name" WidthRequest="120" FontSize="12"/>
+                                    <Entry x:Name="ApiKeyBox" Placeholder="API Key" IsPassword="True" WidthRequest="120" FontSize="12"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </FlexLayout>
+
+                    <Label Text="Bibliography Entries" FontAttributes="Bold" FontSize="18" Margin="0,8,0,0"/>
+
+                </VerticalStackLayout>
+            </CollectionView.Header>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="32" Spacing="8" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="📚" FontSize="48" HorizontalOptions="Center"/>
+                    <Label Text="No entries yet" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label Text="Add citations above to get started." FontSize="14" TextColor="Gray" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border StrokeShape="RoundRectangle 8" 
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#333333}" 
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}"
+                            Padding="16" 
+                            Margin="0,0,0,12">
+                        <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, Auto">
+                            
+                            <Label Grid.Row="0" Grid.Column="0" 
+                                   Text="{Binding Title}" 
+                                   FontAttributes="Bold" 
+                                   FontSize="16" 
+                                   TextColor="{AppThemeBinding Light=#0066CC, Dark=#66B2FF}"
+                                   LineBreakMode="WordWrap"/>
+                                   
+                            <Label Grid.Row="0" Grid.Column="1" 
+                                   Text="{Binding PublicationDate.Year, StringFormat='({0})'}" 
+                                   FontAttributes="Bold"/>
+
+                            <CollectionView Grid.Row="1" Grid.ColumnSpan="2" 
+                                            ItemsSource="{Binding Contributors}" 
+                                            Margin="0,8">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <HorizontalStackLayout Spacing="4">
+                                            <Label Text="•" TextColor="{AppThemeBinding Light=#0066CC, Dark=#66B2FF}"/>
+                                            <Label Text="{Binding FirstName}"/>
+                                            <Label Text="{Binding LastName}" FontAttributes="Bold"/>
+                                        </HorizontalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="12">
+                                <Label Text="{Binding Publisher, StringFormat='🏢 {0}'}" FontSize="12" TextColor="Gray"/>
+                                <Label Text="{Binding SourceType, StringFormat='🏷️ {0}'}" FontSize="12" TextColor="Gray"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.Footer>
+                <VerticalStackLayout Spacing="16" Padding="0,16,0,32">
+                    
+                    <Border StrokeShape="RoundRectangle 12" 
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}"
+                            Padding="16">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Generate Output" FontAttributes="Bold" FontSize="16"/>
+                            <Editor x:Name="Apa" 
+                                    Placeholder="Generated APA format will appear here" 
+                                    HeightRequest="100" 
+                                    IsReadOnly="True"/>
+                            
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                <Button Grid.Column="0" x:Name="ApaButton" Text="Generate APA" Clicked="OnApaClicked" BackgroundColor="#0055AA" TextColor="White"/>
+                                <Button Grid.Column="1" x:Name="ExportButton" Text="Export All" Clicked="OnExportClicked" BackgroundColor="#51CF66" TextColor="White"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label x:Name="EntryCountLabel" Text="0 entries loaded" VerticalOptions="Center" TextColor="Gray"/>
+                        <Button Grid.Column="1" x:Name="ClearButton" Text="Clear All" Clicked="OnClearClicked" BackgroundColor="#FF6B6B" TextColor="White" Padding="16,0" HeightRequest="36"/>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </CollectionView.Footer>
+        </CollectionView>
     </Grid>
-    </ScrollView>
-
 </ContentPage>

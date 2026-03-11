@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Bibliography.Lib.Models;
 
 namespace Bibliography.Lib.Parsers;
 public class AuthorNameParser
@@ -65,23 +66,23 @@ public class AuthorNameParser
     /// <summary>
     /// Formats author names for citation purposes (e.g., "Smith, J." or "Smith, John").
     /// </summary>
-    public static string FormatForCitation(AuthorName author, CitationFormat format = CitationFormat.LastNameFirstInitial)
+    public static string FormatForCitation(AuthorName author, AuthorCitationFormat format = AuthorCitationFormat.LastNameFirstInitial)
     {
         if (string.IsNullOrWhiteSpace(author.Surname))
             return author.FullName;
 
         return format switch
         {
-            CitationFormat.LastNameFirst => 
+            AuthorCitationFormat.LastNameFirst => 
                 $"{author.Surname}, {author.FirstNames}".TrimEnd(',', ' '),
             
-            CitationFormat.LastNameFirstInitial => 
+            AuthorCitationFormat.LastNameFirstInitial => 
                 FormatFirstInitial(author.Surname, author.FirstNames),
             
-            CitationFormat.LastNameFirstInitials => 
+            AuthorCitationFormat.LastNameFirstInitials => 
                 FormatFirstInitials(author.Surname, author.FirstNames),
             
-            CitationFormat.FullName => 
+            AuthorCitationFormat.FullName => 
                 author.FullName,
             
             _ => author.FullName
@@ -123,10 +124,3 @@ public class AuthorName
     }
 }
 
-public enum CitationFormat
-{
-    FullName,                  // John Smith
-    LastNameFirst,             // Smith, John
-    LastNameFirstInitial,      // Smith, J.
-    LastNameFirstInitials      // Smith, J. Q.
-}
