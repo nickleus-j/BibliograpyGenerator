@@ -2,6 +2,7 @@
 using Bibliography.Lib.Formatters;
 using Bibliography.Lib.Models;
 using Bibliography.Lib.Parsers;
+using Bibluiography.GoogleBooks.Lib;
 
 namespace Bibliography.Maui;
 
@@ -72,9 +73,39 @@ public partial class MainPage : ContentPage
         var formatter = BibliographyFormatter.GetInstance().FormatBibliography(_bibliographyEntries,CitationStyle.APA);
         return formatter;
     }
+    private async Task<string> GenerateMla()
+    {
+        GoogleBooksClient client = new GoogleBooksClient(AppNameBox.Text,ApiKeyBox.Text);
+        var entries=new List<BibliographyEntry>();
+        var entry=await client.GetBookByIsbnAsync(isbnBox.Text);
+        entries.Add(entry);
+        var formatter = BibliographyFormatter.GetInstance().FormatBibliography(entries,CitationStyle.MLA);
+        return formatter;
+    }
     private void OnApaClicked(object sender, EventArgs e)
     {
         Apa.Text = GenerateApa();
+    }
+    private async void OnLookupClicked(object sender, EventArgs e)
+    {
+        (sender as Button).IsEnabled = false;
+
+        try
+        {
+            // Call your actual async method that returns a Task
+            Apa.Text = await GenerateMla();
+        
+        }
+        catch (Exception ex)
+        {
+            // Handle any exceptions gracefully within the handler
+            await Shell.Current.DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
+        }
+        finally
+        {
+            // Ensure UI elements are re-enabled
+            (sender as Button).IsEnabled = true;
+        }
     }
     private void OnClearClicked(object sender, EventArgs e)
     {

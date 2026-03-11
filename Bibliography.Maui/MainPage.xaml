@@ -156,6 +156,14 @@
                         Padding="12"
                         CornerRadius="8"
                         HeightRequest="48"/>
+                <Editor x:Name="isbnBox"/>
+                <HorizontalStackLayout>
+                    <Label Text="Google Books App name"/>
+                    <Editor x:Name="AppNameBox"/>
+                    <Label Text="Google Books Api Key"/>
+                    <Editor x:Name="ApiKeyBox"/>
+                </HorizontalStackLayout>
+                <Button x:Name="LookupBtn" Text="Lookup ISBN via Google Books" Clicked="OnLookupClicked"/>
             </VerticalStackLayout>
 
             <!-- Footer Section -->
