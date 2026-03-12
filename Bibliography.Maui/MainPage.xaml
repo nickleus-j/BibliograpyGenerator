@@ -15,12 +15,12 @@
                     
                     <VerticalStackLayout Spacing="4" Margin="0,0,0,8">
                         <Label Text="Bibliography Generator" 
-                               FontSize="28" 
+                               FontSize="24" 
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
                         <Label Text="Parse BibTeX or lookup ISBNs to generate your citations."
                                FontSize="14"
-                               TextColor="{AppThemeBinding Light=#666666, Dark=#A0A0A0}"/>
+                               TextColor="{AppThemeBinding Light=#555, Dark=#A0A0A0}"/>
                     </VerticalStackLayout>
 
                     <FlexLayout Direction="Row" 

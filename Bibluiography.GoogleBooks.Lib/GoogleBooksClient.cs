@@ -25,8 +25,6 @@ public class GoogleBooksClient
                 ApplicationName = ApplicationName,
                 ApiKey = ApiKey,
             });
-        // Task<Volumes> task=  service.Volumes.List(isbn).ExecuteAsync();
-            
         try
         {
                
@@ -43,45 +41,62 @@ public class GoogleBooksClient
 
     }
     private const string ApiUrl = "https://www.googleapis.com/books/v1/volumes";
-    private static HttpClient _httpClient = new HttpClient();
+    private static readonly HttpClient _httpClient = new HttpClient();
 
     /// <summary>
     /// Requires api key and App Name from google books to retrieve needed Data
     /// </summary>
-    /// <param name="q"></param>
+    /// <param name="isbn"></param>
     /// <returns></returns>
-    public async Task<BibliographyEntry> GetBookByIsbnAsync(string q)
+    public async Task<BibliographyEntry> GetBookByIsbnAsync(string isbn)
     {
         try
         {
-            // Query by ISBN
-            string query = $"?q=isbn:{q}&key=";
-            string url = ApiUrl + query+ApiKey;
+            if (string.IsNullOrEmpty(ApiKey))
+                throw new InvalidOperationException("API key not configured. Please set it in settings.");
+
+            string url = $"{ApiUrl}?q=isbn:{isbn}&key={ApiKey}";
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(url).ConfigureAwait(false);
+            using HttpResponseMessage response = await _httpClient.GetAsync(url).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
             string jsonContent = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<GoogleBooksResponse>(jsonContent);
 
+            if (result?.Items == null || result.Items.Count == 0)
+                throw new InvalidOperationException($"No book found with ISBN: {isbn}");
+
             var info = result.Items.FirstOrDefault().VolumeInfo;
-            var authors=AuthorNameParser.ParseAuthors(info.Authors);
+            var authors = AuthorNameParser.ParseAuthors(info.Authors);
+
             return new BibliographyEntry
             {
                 Title = info.Title,
                 Publisher = info.Publisher,
                 SourceType = SourceType.Book,
-                Contributors = authors?.Select(a => new Contributor { FirstName = a.FirstNames,LastName = a.Surname}).ToList() ?? new(),
+                Contributors = authors?.Select(a => new Contributor
+                {
+                    FirstName = a.FirstNames,
+                    LastName = a.Surname
+                }).ToList() ?? new(),
                 PublicationDate = ParseDate(info.PublishedDate)
             };
         }
+        catch (HttpRequestException ex)
+        {
+            throw new InvalidOperationException($"Failed to fetch book data: {ex.Message}", ex);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Failed to parse response: {ex.Message}", ex);
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching book data: {ex.Message}");
-            return null;
+            throw new InvalidOperationException($"Unexpected error: {ex.Message}", ex);
         }
     }
+
     public async Task<BibliographyEntry?> SearchBookByIsbnAsync(string q)
     {
         var response= await SearchTitle(q);
