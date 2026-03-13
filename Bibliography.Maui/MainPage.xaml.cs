@@ -76,7 +76,7 @@ public partial class MainPage : ContentPage
     {
         GoogleBooksClient client = new GoogleBooksClient(AppNameBox.Text,ApiKeyBox.Text);
         var entries=new List<BibliographyEntry>();
-        var entry=await client.GetBookByIsbnAsync(isbnBox.Text);
+        var entry=await client.SearchBookByIsbnAsync(isbnBox.Text);
         entries.Add(entry);
         var formatter = BibliographyFormatter.GetInstance().FormatBibliography(entries,CitationStyle.MLA);
         return formatter;

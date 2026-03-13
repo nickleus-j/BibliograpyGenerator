@@ -149,7 +149,7 @@
                     
                     <Border StrokeShape="RoundRectangle 12" 
                             BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}"
-                            Padding="16">
+                            Padding="14">
                         <VerticalStackLayout Spacing="12">
                             <Label Text="Generate Output" FontAttributes="Bold" FontSize="16"/>
                             <Editor x:Name="Apa" 

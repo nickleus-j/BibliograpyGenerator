@@ -28,7 +28,7 @@ public class GoogleBooksClient
         try
         {
                
-            Volumes result = await service.Volumes.List(isbn).ExecuteAsync();
+            Volumes result = await service.Volumes.List("isbn:"+isbn).ExecuteAsync();
             if (result is { Items: not null }&&result.Items.Any())
             {
                 var item = result.Items.FirstOrDefault();
@@ -41,7 +41,7 @@ public class GoogleBooksClient
 
     }
     private const string ApiUrl = "https://www.googleapis.com/books/v1/volumes";
-    private static readonly HttpClient _httpClient = new HttpClient();
+    private readonly static HttpClient _httpClient = new HttpClient();
 
     /// <summary>
     /// Requires api key and App Name from google books to retrieve needed Data
@@ -58,7 +58,7 @@ public class GoogleBooksClient
             string url = $"{ApiUrl}?q=isbn:{isbn}&key={ApiKey}";
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
 
-            using HttpResponseMessage response = await _httpClient.GetAsync(url).ConfigureAwait(false);
+            using HttpResponseMessage response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             string jsonContent = await response.Content.ReadAsStringAsync();
@@ -69,7 +69,6 @@ public class GoogleBooksClient
 
             var info = result.Items.FirstOrDefault().VolumeInfo;
             var authors = AuthorNameParser.ParseAuthors(info.Authors);
-
             return new BibliographyEntry
             {
                 Title = info.Title,
