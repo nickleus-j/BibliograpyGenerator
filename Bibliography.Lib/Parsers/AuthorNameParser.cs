@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Bibliography.Lib.Models;
 
 namespace Bibliography.Lib.Parsers;
+
 public class AuthorNameParser
 {
     /// <summary>
-    /// Parses an author's full name into surname and first names.
-    /// Handles various name formats: "John Smith", "Smith, John", "John Q. Smith", etc.
+    ///     Parses an author's full name into surname and first names.
+    ///     Handles various name formats: "John Smith", "Smith, John", "John Q. Smith", etc.
     /// </summary>
     public static AuthorName ParseName(string fullName)
     {
@@ -57,34 +54,36 @@ public class AuthorNameParser
     }
 
     /// <summary>
-    /// Parses multiple author names and returns a list of parsed names.
+    ///     Parses multiple author names and returns a list of parsed names.
     /// </summary>
     public static List<AuthorName> ParseAuthors(List<string> authorNames)
     {
         return authorNames?.Select(ParseName).ToList() ?? new List<AuthorName>();
     }
+
     /// <summary>
-    /// Formats author names for citation purposes (e.g., "Smith, J." or "Smith, John").
+    ///     Formats author names for citation purposes (e.g., "Smith, J." or "Smith, John").
     /// </summary>
-    public static string FormatForCitation(AuthorName author, AuthorCitationFormat format = AuthorCitationFormat.LastNameFirstInitial)
+    public static string FormatForCitation(AuthorName author,
+        AuthorCitationFormat format = AuthorCitationFormat.LastNameFirstInitial)
     {
         if (string.IsNullOrWhiteSpace(author.Surname))
             return author.FullName;
 
         return format switch
         {
-            AuthorCitationFormat.LastNameFirst => 
+            AuthorCitationFormat.LastNameFirst =>
                 $"{author.Surname}, {author.FirstNames}".TrimEnd(',', ' '),
-            
-            AuthorCitationFormat.LastNameFirstInitial => 
+
+            AuthorCitationFormat.LastNameFirstInitial =>
                 FormatFirstInitial(author.Surname, author.FirstNames),
-            
-            AuthorCitationFormat.LastNameFirstInitials => 
+
+            AuthorCitationFormat.LastNameFirstInitials =>
                 FormatFirstInitials(author.Surname, author.FirstNames),
-            
-            AuthorCitationFormat.FullName => 
+
+            AuthorCitationFormat.FullName =>
                 author.FullName,
-            
+
             _ => author.FullName
         };
     }
@@ -94,7 +93,7 @@ public class AuthorNameParser
         if (string.IsNullOrWhiteSpace(firstNames))
             return surname;
 
-        string initial = firstNames.Split(' ')[0][0].ToString().ToUpper();
+        var initial = firstNames.Split(' ')[0][0].ToString().ToUpper();
         return $"{surname}, {initial}.";
     }
 
@@ -103,7 +102,7 @@ public class AuthorNameParser
         if (string.IsNullOrWhiteSpace(firstNames))
             return surname;
 
-        var initials = string.Join(". ", 
+        var initials = string.Join(". ",
             firstNames.Split(' ')
                 .Where(n => !string.IsNullOrWhiteSpace(n))
                 .Select(n => n[0].ToString().ToUpper()));
@@ -123,4 +122,3 @@ public class AuthorName
         return $"{FirstNames} {Surname}".Trim();
     }
 }
-
