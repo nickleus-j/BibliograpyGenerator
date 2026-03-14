@@ -149,18 +149,36 @@
                     
                     <Border StrokeShape="RoundRectangle 12" 
                             BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}"
-                            Padding="14">
+                            Padding="16">
                         <VerticalStackLayout Spacing="12">
-                            <Label Text="Generate Output" FontAttributes="Bold" FontSize="16"/>
-                            <Editor x:Name="Apa" 
-                                    Placeholder="Generated APA format will appear here" 
-                                    HeightRequest="100" 
-                                    IsReadOnly="True"/>
-                            
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                <Button Grid.Column="0" x:Name="ApaButton" Text="Generate APA" Clicked="OnApaClicked" BackgroundColor="#0055AA" TextColor="White"/>
-                                <Button Grid.Column="1" x:Name="ExportButton" Text="Export All" Clicked="OnExportClicked" BackgroundColor="#51CF66" TextColor="White"/>
+                            <Label Text="Generate Bibliography" FontAttributes="Bold" FontSize="16"/>
+        
+                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                                <Picker x:Name="CitationStylePicker"
+                                        Grid.Column="0"
+                                        Title="Select Citation Style"
+                                        BackgroundColor="{AppThemeBinding Light=#F5F6F8, Dark=#2D3748}"
+                                        TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}"/>
+            
+                                <Button Grid.Column="1" 
+                                        x:Name="FormatButton" 
+                                        Text="Format" 
+                                        Clicked="OnFormatClicked" 
+                                        BackgroundColor="#0055AA" 
+                                        TextColor="White"
+                                        WidthRequest="100"/>
                             </Grid>
+
+                            <Editor x:Name="FormattedOutputEditor" 
+                                    Placeholder="Generated citations will appear here..." 
+                                    HeightRequest="150" 
+                                    IsReadOnly="True"/>
+        
+                            <Button x:Name="ExportButton" 
+                                    Text="Export All" 
+                                    Clicked="OnExportClicked" 
+                                    BackgroundColor="#51CF66" 
+                                    TextColor="White"/>
                         </VerticalStackLayout>
                     </Border>
 

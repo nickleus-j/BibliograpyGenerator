@@ -18,6 +18,11 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         
         BibliographyGrid.ItemsSource = BibliographyEntries;
+        // Populate the Picker with the CitationStyle enum values
+        CitationStylePicker.ItemsSource = Enum.GetValues(typeof(CitationStyle)).Cast<CitationStyle>().ToList();
+        
+        // Set a default selection (e.g., APA) so it's never null on first load
+        CitationStylePicker.SelectedIndex = 0;
     }
 
     private void OnParseClicked(object sender, EventArgs e)
@@ -72,6 +77,14 @@ public partial class MainPage : ContentPage
         var formatter = BibliographyFormatter.GetInstance().FormatBibliography(_bibliographyEntries,CitationStyle.APA);
         return formatter;
     }
+    public string FormatBibliography(IEnumerable<BibliographyEntry> entries, CitationStyle style)
+    {
+        if (entries == null) throw new ArgumentNullException(nameof(entries));
+        if (!entries.Any()) return "No entries provided.";
+        
+        BibliographyFormatter.GetInstance().FormatBibliography(entries,style);
+        return BibliographyFormatter.GetInstance().FormatBibliography(entries,style);
+    }
     private async Task<string> GenerateMla()
     {
         GoogleBooksClient client = new GoogleBooksClient(AppNameBox.Text,ApiKeyBox.Text);
@@ -81,9 +94,29 @@ public partial class MainPage : ContentPage
         var formatter = BibliographyFormatter.GetInstance().FormatBibliography(entries,CitationStyle.MLA);
         return formatter;
     }
-    private void OnApaClicked(object sender, EventArgs e)
+    private void OnFormatClicked(object sender, EventArgs e)
     {
-        Apa.Text = GenerateApa();
+        if (!BibliographyEntries.Any())
+        {
+            DisplayAlert("Notice", "Please add some entries first before generating.", "OK");
+            return;
+        }
+
+        // Extract the selected enum directly from the Picker
+        var selectedStyle = (CitationStyle)CitationStylePicker.SelectedItem;
+
+        try
+        {
+            // Pass the data into your factory-backed formatting method
+            string formattedText = FormatBibliography(BibliographyEntries, selectedStyle);
+            
+            // Push the results to the readonly Editor
+            FormattedOutputEditor.Text = formattedText;
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert("Formatting Error", $"An error occurred: {ex.Message}", "OK");
+        }
     }
     private async void OnLookupClicked(object sender, EventArgs e)
     {
@@ -92,7 +125,7 @@ public partial class MainPage : ContentPage
         try
         {
             // Call your actual async method that returns a Task
-            Apa.Text = await GenerateMla();
+            FormattedOutputEditor.Text = await GenerateMla();
         
         }
         catch (Exception ex)
