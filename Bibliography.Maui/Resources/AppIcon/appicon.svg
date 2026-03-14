@@ -1,4 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="456" height="456" fill="#512BD4" />
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Indigo Circle -->
+    <circle cx="100" cy="100" r="80" fill="#4B0082" />
+
+    <!-- Feline Silhouette (Black) -->
+    <path d="M100 160 
+           C 80 160, 70 145, 70 120 
+           C 70 100, 75 85, 85 75 
+           L 80 50 L 95 65 
+           C 98 64, 102 64, 105 65 
+           L 120 50 L 115 75 
+           C 130 145, 120 160, 100 160 Z"
+          fill="#ddd" />
 </svg>
